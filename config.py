@@ -16,5 +16,5 @@ PIPE = "/tmp/packet_pipe"
 model = None
 
 sender_email = "cyberdefensiveengine@gmail.com"
-sender_password = "qdxh ktqh wdym dcuk"
+sender_password = "   "
 receiver_email = "a23894843@gmail.com"
