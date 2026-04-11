@@ -283,6 +283,10 @@ if __name__ == "__main__":
         os.remove(os.path.join(os.getcwd(), "Cyber_Defensive_Engine.log"))
         print(f"Deleted : {os.path.join(os.getcwd(), "Cyber_Defensive_Engine.log")}")
 
+
+    if not os.path.exists("./sniffer")    :
+        subprocess.run(["g++","sniffer.cpp","-o","sniffer","-lpcap"])
+
     # Start the C++ sniffer
     try:
         sniffer = subprocess.Popen(["sudo", "./sniffer"])
