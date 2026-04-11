@@ -18,4 +18,4 @@ model = None
 
 sender_email = "cyberdefensiveengine@gmail.com"
 sender_password = "bafj qcup cbiz hrqz"
-receiver_email = "a23894843@gmail.com"
+receiver_email = "receiver_email"
