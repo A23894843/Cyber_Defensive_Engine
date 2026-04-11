@@ -8,6 +8,7 @@ import subprocess
 import threading
 import numpy as np
 from config import *
+from tkinter import *
 from datetime import datetime
 from collections import defaultdict
 from email.message import EmailMessage
@@ -283,6 +284,11 @@ if __name__ == "__main__":
         os.remove(os.path.join(os.getcwd(), "Cyber_Defensive_Engine.log"))
         print(f"Deleted : {os.path.join(os.getcwd(), "Cyber_Defensive_Engine.log")}")
 
+    if not os.path.exists(PIPE) :
+        subprocess.run(["mkfifo", PIPE])
+        subprocess.run(["chmod", "666", PIPE])
+    
+    time.sleep(2)
 
     if not os.path.exists("./sniffer")    :
         subprocess.run(["g++","sniffer.cpp","-o","sniffer","-lpcap"])
