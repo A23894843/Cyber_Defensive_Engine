@@ -13,7 +13,7 @@ ofstream logFile("/home/abhinandan-kali/Desktop/Cyber_Defensive_Engine/Cyber_Def
 int pipe_fd;
 
 void openPipe() {
-    pipe_fd = open("/tmp/packet_pipe", O_WRONLY);
+    pipe_fd = open("/home/abhinandan-kali/Desktop/Cyber_Defensive_Engine/packet_pipe", O_WRONLY);
 
     if (pipe_fd == -1)  {
         perror("Pipe open failed");
