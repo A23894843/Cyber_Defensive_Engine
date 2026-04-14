@@ -1,4 +1,7 @@
 import os
+import logging
+import threading
+
 LOG_FILES = [
     # Core System & Authentication
     "/var/log/auth.log",       # SSH, sudo, and authentication attempts
@@ -56,6 +59,11 @@ PIPE = "/tmp/packet_pipe"
 model = None
 
 sender_email = "cyberdefensiveengine@gmail.com"
-sender_password = "bafj qcup cbiz hrqz"
-receiver_email = ""
-password = ""
+sender_password = os.getenv("EMAIL_PASS")
+name = None
+receiver_email = None
+
+log = logging.getLogger("Cyber_Defensive_Engine")
+log.setLevel(logging.INFO)
+model_ready = threading.Event()
+model_ready_ = False
