@@ -5,26 +5,28 @@ import time
 import joblib
 import smtplib
 import logging
+import platform
 import subprocess
 import threading
 import numpy as np
-import random as ran
 from config import *
+import random as ran
 from tkinter import *
 from tkinter import ttk
 from tkinter import messagebox
 from datetime import datetime
 import matplotlib.pyplot as plt
-from collections import defaultdict
 from email.message import EmailMessage
 from sklearn.ensemble import IsolationForest
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
+if platform.system() == "Windows"   :
+    import winsound
 
 gui = Tk()
 gui.title("Cyber Defensive Engine")
 gui.geometry("900x450")
 
-otp_s = ran.randint(1000, 9999)
 is_valid = True
 
 if not log.handlers:
@@ -34,7 +36,8 @@ if not log.handlers:
     log.addHandler(handler)
 
 if not os.path.exists("config.json")    :
-    subprocess.run(["touch","config.json"])
+    with open("config.json", 'w') as f :
+        json.dump({"name": "", "email": ""}, f)
     is_valid = False
 
 def load_user_config()  :
@@ -43,10 +46,14 @@ def load_user_config()  :
 
 data = load_user_config()
 
-if receiver_email == None or receiver_email.find("@gmail.com") == -1    :
+if not receiver_email or "@gmail.com" not in receiver_email or not name :
     is_valid = False
-if name == ""   :
-    is_valid = False
+
+def play_alert_sound()  :
+    if platform.system() == "Windows" :
+        threading.Thread(targer = lambda: winsound.Beep(1000, 500), daemon = True).start()
+    else :
+        print('\a')
 
 def alert(subject, body):
     message = EmailMessage()
@@ -65,10 +72,31 @@ def alert(subject, body):
     except Exception as e:
         log.error(f"Failed to send email alert: {e}")
 
+if not is_valid :
+    config_win = Toplevel(gui)
+    config_win.geometry("900x450")
+    Label(config_win, text = "Name").grid(row = 0, column = 0, pady = 10)
+    name_entry = Entry(config_win)
+    name_entry.grid(row = 0, column = 1, pady = 10)
 
-def verify_Email()    :
-    subject = "Email Verification Request"
-    message = f"""Dear User,
+    Label(config_win, text = "Email").grid(row = 1, column = 0, pady = 10)
+    email_entry = Entry(config_win)
+    email_entry.grid(row = 1, column = 1, pady = 10)
+
+    def verify_Email()    :
+        global otp_s
+
+        email_e = email_entry.get().strip()
+
+        if not email_e:
+            messagebox.showerror("Error", "Please enter email first!")
+            return
+
+        # 🔐 Generate OTP
+        otp_s = str(ran.randint(100000, 999999))
+        
+        subject = "Email Verification Request"
+        body = f"""Dear User,
 
 I hope this message finds you well.
 
@@ -88,18 +116,21 @@ Best regards,
 Cyber Defensive Engine
 Support Team"""
     
-    alert(subject, message)
+        message = EmailMessage()
+        message['Subject'] = subject
+        message['From'] = sender_email
+        message['To'] = email_e
+        message.set_content(body)
 
-if not is_valid :
-    config_win = Toplevel(gui)
-    config_win.geometry("900x450")
-    Label(config_win, text = "Name").grid(row = 0, column = 0, pady = 10)
-    name_entry = Entry(config_win)
-    name_entry.grid(row = 0, column = 1, pady = 10)
-
-    Label(config_win, text = "Email").grid(row = 1, column = 0, pady = 10)
-    email_entry = Entry(config_win)
-    email_entry.grid(row = 1, column = 1, pady = 10)
+        context = ssl.create_default_context()
+        try:
+            with smtplib.SMTP("smtp.gmail.com", 587) as server:
+                server.starttls(context=context)
+                server.login(sender_email, sender_password)
+                server.send_message(message)
+            log.info(f"Email sent to {email_e}")
+        except Exception as e:
+            log.error(f"Failed to send email alert: {e}")
 
     Button(config_win, text = "Verify Email", width = 20, command = verify_Email).grid(row = 1, column = 2, pady = 10)
 
@@ -111,10 +142,11 @@ if not is_valid :
         name_e = name_entry.get().strip()
         email_r = email_entry.get().strip()
         otp_r = otp_entry.get().strip()
+        print(f"Sent otp: {otp_s}")
+        print(f"Received otp: {otp_r}")
 
         if otp_s != otp_r   :
             messagebox.showerror("Error: ", "Otp is invalid!")
-            return 0
         else :
             with open("config.json", 'r') as f :
                 data = json.load(f)
@@ -125,7 +157,8 @@ if not is_valid :
             with open("config.json", 'w') as f :
                 json.dump(data, f, indent = 4)
 
-            return 1
+            messagebox.showinfo("Success", "Configuration saved successfully!")
+            config_win.destroy()
 
     Button(config_win, width = 20, text = "Submit", command = store).grid(row = 3, column = 1, pady = 10)
 
@@ -278,10 +311,28 @@ Automated Intrusion Prevention System
                         f"sudo iptables -C INPUT -s {ip} -j DROP 2>/dev/null || "
                         f"sudo iptables -A INPUT -s {ip} -j DROP"
                     )   
+
+                    global attack_count
+                    attack_count += 1
+
+                    play_alert_sound()
                     blocked_ips.add(ip)
 
             except Exception as e:
                 log.error(f"Detection error: {e}")
+
+def auto_unlock_system() :
+    while True :
+        now = time.time()
+        for ip in list(blocked_ips) :
+            if now - blocked_time.get(ip, now) > BLOCK_COOLDOWN :
+                if platform.system() == "Linux" :
+                    os.system(f"sudo iptables -D INPUT -s {ip} -j DROP")
+                blocked_ips.remove[ip]
+                del blocked_time[ip]
+                risk_score[ip] = 0
+                log.info(f"Auto-unblocked IP: {ip}")
+        time.sleep(5)
 
 def monitor_file(file):
     while True:
@@ -415,6 +466,6 @@ if __name__ == "__main__":
     t_detect.start()
     threads.append(t_detect)
 
-    gui.mainloop()
-
     gui.protocol("WM_DELETE_WINDOW", on_close)
+
+    gui.mainloop()
