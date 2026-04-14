@@ -1,5 +1,6 @@
 import os
 import ssl
+import json
 import time
 import joblib
 import smtplib
@@ -7,23 +8,45 @@ import logging
 import subprocess
 import threading
 import numpy as np
+import random as ran
 from config import *
 from tkinter import *
+from tkinter import ttk
+from tkinter import messagebox
 from datetime import datetime
+import matplotlib.pyplot as plt
 from collections import defaultdict
 from email.message import EmailMessage
 from sklearn.ensemble import IsolationForest
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
-log = logging.getLogger("Cyber_Defensive_Engine")
-log.setLevel(logging.INFO)
-model_ready = threading.Event()
-model_ready_ = False
+gui = Tk()
+gui.title("Cyber Defensive Engine")
+gui.geometry("900x450")
+
+otp_s = ran.randint(1000, 9999)
+is_valid = True
 
 if not log.handlers:
     handler = logging.FileHandler(log_path)
     formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
     handler.setFormatter(formatter)
     log.addHandler(handler)
+
+if not os.path.exists("config.json")    :
+    subprocess.run(["touch","config.json"])
+    is_valid = False
+
+def load_user_config()  :
+    with open("config.json", 'r') as f :
+        return json.load(f)
+
+data = load_user_config()
+
+if receiver_email == None or receiver_email.find("@gmail.com") == -1    :
+    is_valid = False
+if name == ""   :
+    is_valid = False
 
 def alert(subject, body):
     message = EmailMessage()
@@ -42,8 +65,74 @@ def alert(subject, body):
     except Exception as e:
         log.error(f"Failed to send email alert: {e}")
 
+
+def verify_Email()    :
+    subject = "Email Verification Request"
+    message = f"""Dear User,
+
+I hope this message finds you well.
+
+Thank you for registering with our service. To complete your registration and ensure the security of your account, we kindly request you to verify your email address.
+
+Please click the link below to verify your email:
+
+{otp_s}
+
+If you did not initiate this request, please ignore this email.
+
+Should you have any questions or need assistance, feel free to contact our support team.
+
+Thank you for your cooperation.
+
+Best regards,
+Cyber Defensive Engine
+Support Team"""
+    
+    alert(subject, message)
+
+if not is_valid :
+    config_win = Toplevel(gui)
+    config_win.geometry("900x450")
+    Label(config_win, text = "Name").grid(row = 0, column = 0, pady = 10)
+    name_entry = Entry(config_win)
+    name_entry.grid(row = 0, column = 1, pady = 10)
+
+    Label(config_win, text = "Email").grid(row = 1, column = 0, pady = 10)
+    email_entry = Entry(config_win)
+    email_entry.grid(row = 1, column = 1, pady = 10)
+
+    Button(config_win, text = "Verify Email", width = 20, command = verify_Email).grid(row = 1, column = 2, pady = 10)
+
+    Label(config_win, text = "One Time Password").grid(row = 2, column = 0, pady = 10)
+    otp_entry = Entry(config_win)
+    otp_entry.grid(row = 2, column = 1, pady = 10)
+
+    def store() :
+        name_e = name_entry.get().strip()
+        email_r = email_entry.get().strip()
+        otp_r = otp_entry.get().strip()
+
+        if otp_s != otp_r   :
+            messagebox.showerror("Error: ", "Otp is invalid!")
+            return 0
+        else :
+            with open("config.json", 'r') as f :
+                data = json.load(f)
+
+            data['name'] = name_e
+            data['email'] = email_r
+
+            with open("config.json", 'w') as f :
+                json.dump(data, f, indent = 4)
+
+            return 1
+
+    Button(config_win, width = 20, text = "Submit", command = store).grid(row = 3, column = 1, pady = 10)
+
+name = data.get("name")
+receiver_email = data.get("email")
+
 def train_model():
-    global model_ready_
     log.info("ML Engine Started....")
     data = []
     start = time.time()
@@ -82,7 +171,6 @@ def train_model():
     joblib.dump(model, MODEL_FILE)
     log.info("Model saved")
 
-    model_ready_ = True
     return model
 
 def unsupervised_learning():
@@ -274,6 +362,11 @@ Automated Log Monitoring System
 
                     alert(subject, body)
 
+def on_close():
+    log.info("Engine shutting down...")
+    sniffer.terminate()
+    gui.destroy()
+
 #---------Main------------------------
 if __name__ == "__main__":
     if os.path.exists(log_path)  :
@@ -322,9 +415,6 @@ if __name__ == "__main__":
     t_detect.start()
     threads.append(t_detect)
 
-    try:
-        while True:
-            time.sleep(1)
-    except KeyboardInterrupt:
-        log.info("Engine shutting down...")
-        sniffer.terminate()
+    gui.mainloop()
+
+    gui.protocol("WM_DELETE_WINDOW", on_close)
