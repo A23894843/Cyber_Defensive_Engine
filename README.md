@@ -118,7 +118,9 @@ from any device on the network.
 Adaptive-Cyber-Defensive-Engine/
 │
 ├── main.py
-├── sniffer.cpp
+├── sniffer.cpp
+├── packet_pipe
+├── Cyber_Defensive_Engine.sock
 ├── config.py
 ├── model.pkl
 ├── Cyber_Defensive_Engine.log
