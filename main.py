@@ -336,14 +336,14 @@ def detection():
 
     while True:
         try:
-            # 1. Read the 12-byte PQC header: [Total_Len][Sig_Len][Pkt_Len][cite: 1]
+            # 1. Read the 12-byte PQC header: [Total_Len][Sig_Len][Pkt_Len]
             header_data = uds_sock.recv(12)
             if not header_data or len(header_data) < 12: 
                 continue
             
             total_len, sig_len, pkt_len = struct.unpack('!III', header_data)
 
-            # 2. Read the full payload (Signature + Packet)[cite: 1]
+            # 2. Read the full payload (Signature + Packet)
             payload = recv_exact(uds_sock, total_len)
 
             if not payload:
@@ -352,24 +352,30 @@ def detection():
             signature = payload[:sig_len]
             packet = payload[sig_len:]
 
-            # 3. Post-Quantum Verification[cite: 1]
+            # 3. Post-Quantum Verification
             if verifier.verify(packet, signature, public_key):
-                # Execute ML Prediction based on the authenticated packet[cite: 1]
+                # Execute ML Prediction based on the authenticated packet
                 prediction = model.predict([[len(packet), 1]])
                 
                 if prediction[0] == -1:
                     ip = extract_source_ip(packet)
                     if ip and ip not in blocked_ips:
                         log.warning(f"ML ANOMALY: Blocking {ip} for abnormal behavior")
-                        # Automated mitigation using iptables[cite: 1]
                         os.system(f"sudo iptables -A INPUT -s {ip} -j DROP")
                         blocked_ips.add(ip)
                         attack_count += 1
                         
-                        # Trigger ML Anomaly Alert[cite: 1]
+                        # Define detection variables
                         detection_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                        packet_size = len(packet)
+                        
+                        # Load current administrator info from config
+                        with open("config.json", 'r') as f:
+                            config_data = json.load(f)
+                            admin_name = config_data.get("name", "Administrator")
+
                         subject = f"🧠 ML ANOMALY: Behavioral Block Implemented for {ip}"
-                        body = f"""Dear {name},
+                        body = f"""Dear {admin_name},
 
 🚨 Machine Learning Security Alert
 
@@ -380,7 +386,7 @@ Our Cyber Defensive Engine's AI module has detected a significant deviation from
 • Event Type       : Traffic Anomaly Detected
 • Detection Method : Isolation Forest (Unsupervised ML)
 • Detection Time   : {detection_time}
-• Source IP       : {ip}
+• Source IP        : {ip}
 --------------------------------------------------
 
 🚫 Automatic Defensive Action Taken:
@@ -405,11 +411,14 @@ Stay secure,
 Cyber Defensive Engine  
 AI-Driven Intrusion Prevention System
 """
-                alert(subject, body)
+                        # FIX: alert() is now inside the block where subject/body are defined
+                        alert(subject, body) 
 
             else:
                 log.error("PQC SECURITY ALERT: Received a tampered or unsigned packet!")
 
+        except socket.timeout:
+            continue # Expected behavior when network is quiet
         except Exception as e:
             log.error(f"UDS Detection Loop Error: {e}")
             time.sleep(0.1) # Prevent CPU spiking on continuous errors
@@ -453,15 +462,11 @@ def pipe_monitoring():
                     # Logic to handle deterministic SCAN triggers from the C++ Sniffer
                     if parts[0] == "SCAN":
                         ip = parts[1]
+                        port_count = parts[2] # Correctly extracted from parts[2]
                         
-                        # Prevent duplicate blocks and alerts for the same IP
                         if ip not in blocked_ips:
                             log.warning(f"HONEYPOT/SCAN TRIGGER: Blocking {ip}")
-                            
-                            # Execute immediate mitigation using system iptables
                             os.system(f"sudo iptables -A INPUT -s {ip} -j DROP")
-                            
-                            # Update global engine statistics
                             blocked_ips.add(ip)
                             attack_count += 1
                             
@@ -483,7 +488,7 @@ The Cyber Defensive Engine has detected a deterministic Port Scan via the Honeyp
 • Event Type       : Deterministic Port Scan
 • Source IP        : {ip}
 • Detection Time   : {detection_time}
-• Targeted Ports   : {port_info.replace('_', ' ')}
+• Targeted Ports   : {port_count} ports detected  <-- FIX: Use port_count here
 --------------------------------------------------
 
 🚫 Automatic Defensive Action Taken:
@@ -506,7 +511,6 @@ Automated Intrusion Prevention System
                             # Call your core alert function to send the message
                             alert(subject, body)
                             play_alert_sound() # Trigger audio notification
-                            
         except Exception as e:
             log.error(f"Pipe Monitoring Error: {e}")
             time.sleep(1) # Graceful recovery before retrying
@@ -531,9 +535,10 @@ def monitor_file(file):
                     continue
                 
                 line = line.lower()
+                st = "PWD=/home/abhinandan-kali/Desktop/Cyber_Defensive_Engine".lower()
 
                 for p in SUSPICIOUS_PATTERNS:
-                    if p in line and "PWD=/home/abhinandan-kali/Desktop/Cyber_Defensive_Engine" in line:
+                    if p in line and st not in line:
                         count += 1
                         break
 
