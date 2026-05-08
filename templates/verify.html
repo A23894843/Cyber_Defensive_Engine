@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Identity - Cyber Defensive Engine</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent-gold: #fbbf24;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --border-color: #334155;
+            --input-bg: #0f172a;
+            --status-green: #22c55e;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Segoe UI', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .verify-container {
+            background-color: var(--card-bg);
+            padding: 2.5rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .status-icon {
+            color: var(--status-green);
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        h1 {
+            font-size: 1.2rem;
+            color: var(--text-main);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+        }
+
+        p {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+        }
+
+        .otp-input {
+            width: 100%;
+            padding: 15px;
+            background-color: var(--input-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--accent-gold);
+            font-size: 1.5rem;
+            letter-spacing: 8px;
+            text-align: center;
+            outline: none;
+            margin-bottom: 1.5rem;
+        }
+
+        .otp-input:focus {
+            border-color: var(--accent-gold);
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--accent-gold);
+            border: none;
+            color: var(--bg-color);
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: opacity 0.3s;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .resend-link {
+            margin-top: 1.5rem;
+            display: block;
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="verify-container">
+        <div class="status-icon">🔒</div>
+        <h1>Two-Factor Authentication</h1>
+        <p>A 6-digit verification code has been sent to your registered email address.</p>
+
+        <form action="/verify" method="POST">
+            <input type="text" 
+                   name="otp" 
+                   class="otp-input" 
+                   placeholder="000000" 
+                   maxlength="6" 
+                   required 
+                   autocomplete="off">
+            
+            <button type="submit">Verify & Access Dashboard</button>
+        </form>
+
+        <a href="/setup" class="resend-link">Change email or restart setup</a>
+    </div>
+
+</body>
+</html>

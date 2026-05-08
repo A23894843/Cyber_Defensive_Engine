@@ -1,0 +1,17 @@
+# Ignore EVERYTHING by default
+*
+
+# Allow these specific directories
+!templates/
+!static/
+
+# Allow these specific source files
+!main.py
+!config.py
+!sniffer.cpp
+!README.md
+!.gitignore
+
+# Allow all files inside templates and static
+!templates/*
+!static/*

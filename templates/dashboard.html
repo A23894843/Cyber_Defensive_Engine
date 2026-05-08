@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Cyber Defensive Engine - Dashboard</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+
+        :root{
+            --bg:#0f172a;
+            --bg2:#111827;
+            --card:rgba(255,255,255,0.08);
+            --border:rgba(255,255,255,0.12);
+            --text:#f8fafc;
+            --muted:#94a3b8;
+
+            --primary:#38bdf8;
+            --green:#22c55e;
+            --red:#ef4444;
+            --yellow:#facc15;
+            --purple:#a855f7;
+
+            --shadow:0 8px 30px rgba(0,0,0,0.35);
+        }
+
+        body.light-theme{
+            --bg:#f1f5f9;
+            --bg2:#ffffff;
+            --card:rgba(255,255,255,0.72);
+            --border:rgba(15,23,42,0.08);
+            --text:#0f172a;
+            --muted:#475569;
+
+            --primary:#0284c7;
+            --green:#16a34a;
+            --red:#dc2626;
+            --yellow:#ca8a04;
+            --purple:#9333ea;
+
+            --shadow:0 8px 25px rgba(0,0,0,0.08);
+        }
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+        }
+
+        body{
+            background:
+                    radial-gradient(circle at top left,#1e293b 0%,transparent 25%),
+                    radial-gradient(circle at bottom right,#0f172a 0%,transparent 25%),
+                    linear-gradient(135deg,var(--bg),var(--bg2));
+
+            color:var(--text);
+            font-family:'Segoe UI',sans-serif;
+            min-height:100vh;
+            padding:30px;
+            transition:0.4s ease;
+        }
+
+        body.light-theme{
+            background:
+                    radial-gradient(circle at top left,#bfdbfe 0%,transparent 25%),
+                    radial-gradient(circle at bottom right,#dbeafe 0%,transparent 25%),
+                    linear-gradient(135deg,#f8fafc,#e2e8f0);
+        }
+
+        .header-container{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            margin-bottom:35px;
+            flex-wrap:wrap;
+            gap:20px;
+        }
+
+        .header-left{
+            display:flex;
+            align-items:center;
+            gap:20px;
+        }
+
+        .header-left img{
+            width:72px;
+            height:72px;
+            border-radius:20px;
+            box-shadow:0 0 25px rgba(56,189,248,0.5);
+        }
+
+        h1{
+            font-size:2.3rem;
+            font-weight:700;
+            background:linear-gradient(to right,var(--primary),#a855f7);
+            -webkit-background-clip:text;
+            -webkit-text-fill-color:transparent;
+            letter-spacing:1px;
+        }
+
+        .status-badge{
+            display:inline-flex;
+            align-items:center;
+            gap:10px;
+            margin-top:10px;
+            background:rgba(34,197,94,0.1);
+            border:1px solid rgba(34,197,94,0.4);
+            color:var(--green);
+            padding:10px 18px;
+            border-radius:50px;
+            font-size:0.9rem;
+            font-weight:600;
+            backdrop-filter:blur(10px);
+        }
+
+        .pulse-dot{
+            width:10px;
+            height:10px;
+            border-radius:50%;
+            background:var(--green);
+            animation:pulse 1.5s infinite;
+        }
+
+        @keyframes pulse{
+            0%{
+                box-shadow:0 0 0 0 rgba(34,197,94,0.7);
+            }
+            70%{
+                box-shadow:0 0 0 10px rgba(34,197,94,0);
+            }
+            100%{
+                box-shadow:0 0 0 0 rgba(34,197,94,0);
+            }
+        }
+
+        .theme-toggle{
+            width:72px;
+            height:38px;
+            background:var(--card);
+            border:1px solid var(--border);
+            border-radius:40px;
+            display:flex;
+            align-items:center;
+            padding:4px;
+            cursor:pointer;
+            position:relative;
+            backdrop-filter:blur(10px);
+        }
+
+        .theme-toggle::before{
+            content:"☀️";
+            position:absolute;
+            left:8px;
+            font-size:14px;
+        }
+
+        .theme-toggle::after{
+            content:"🌙";
+            position:absolute;
+            right:8px;
+            font-size:14px;
+        }
+
+        .toggle-ball{
+            width:28px;
+            height:28px;
+            border-radius:50%;
+            background:linear-gradient(135deg,var(--primary),#8b5cf6);
+            transition:0.3s ease;
+            z-index:2;
+        }
+
+        body.light-theme .toggle-ball{
+            transform:translateX(34px);
+        }
+
+        .dashboard-grid{
+            display:grid;
+            grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+            gap:24px;
+        }
+
+        .card{
+            background:var(--card);
+            border:1px solid var(--border);
+            backdrop-filter:blur(18px);
+            border-radius:24px;
+            padding:24px;
+            box-shadow:var(--shadow);
+            position:relative;
+            overflow:hidden;
+            transition:0.35s ease;
+        }
+
+        .card:hover{
+            transform:translateY(-6px);
+        }
+
+        .card::before{
+            content:"";
+            position:absolute;
+            top:0;
+            left:0;
+            width:100%;
+            height:4px;
+            background:linear-gradient(to right,var(--primary),#8b5cf6);
+        }
+
+        .card h3{
+            margin-bottom:18px;
+            font-size:1.1rem;
+            color:var(--text);
+        }
+
+        table{
+            width:100%;
+            border-collapse:collapse;
+        }
+
+        td{
+            padding:14px 0;
+            border-bottom:1px solid var(--border);
+        }
+
+        .stat-value{
+            font-size:1.5rem;
+            font-weight:700;
+            color:var(--primary);
+        }
+
+        .peak-stat{
+            color:var(--muted);
+            font-size:0.85rem;
+        }
+
+        .tag{
+            display:inline-block;
+            padding:8px 14px;
+            border-radius:12px;
+            margin-top:8px;
+            margin-right:6px;
+            font-size:0.85rem;
+            font-weight:600;
+        }
+
+        .tag.ml{
+            background:rgba(56,189,248,0.15);
+            color:var(--primary);
+        }
+
+        .tag.pqc{
+            background:rgba(168,85,247,0.15);
+            color:var(--purple);
+        }
+
+        .tag.honey{
+            background:rgba(250,204,21,0.15);
+            color:var(--yellow);
+        }
+
+        .progress-container{
+            width:100%;
+            height:12px;
+            border-radius:20px;
+            background:rgba(255,255,255,0.08);
+            overflow:hidden;
+            margin-top:10px;
+        }
+
+        .progress-bar{
+            width:0%;
+            height:100%;
+            background:linear-gradient(to right,var(--red),#f97316);
+            transition:0.5s ease;
+            border-radius:20px;
+        }
+
+        .log-container{
+            max-height:180px;
+            overflow-y:auto;
+        }
+
+        .log-list{
+            list-style:none;
+        }
+
+        .log-list li{
+            padding:10px 0;
+            border-bottom:1px solid var(--border);
+            font-size:0.9rem;
+        }
+
+        .log-time{
+            color:var(--muted);
+            margin-right:10px;
+        }
+
+        .log-warning{
+            color:var(--yellow);
+        }
+
+        .log-success{
+            color:var(--green);
+        }
+
+        .log-info{
+            color:var(--primary);
+        }
+
+        .ip-list{
+            list-style:none;
+            max-height:180px;
+            overflow-y:auto;
+        }
+
+        .ip-list li{
+            padding:10px;
+            margin-bottom:8px;
+            border-radius:12px;
+            background:rgba(239,68,68,0.08);
+            color:var(--red);
+            font-family:monospace;
+        }
+
+        .details-list{
+            list-style:none;
+            line-height:1.9;
+        }
+
+        .details-list strong{
+            color:var(--primary);
+        }
+
+        .members-grid{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:8px;
+            margin-top:10px;
+        }
+
+        .chart-container{
+            position:relative;
+            height:230px;
+            width:100%;
+        }
+
+        #gauge-label{
+            text-align:center;
+            margin-top:10px;
+            font-weight:700;
+            color:var(--primary);
+        }
+
+        ::-webkit-scrollbar{
+            width:7px;
+        }
+
+        ::-webkit-scrollbar-thumb{
+            background:var(--primary);
+            border-radius:20px;
+        }
+
+        @media(max-width:768px){
+
+            body{
+                padding:18px;
+            }
+
+            h1{
+                font-size:1.7rem;
+            }
+
+            .header-container{
+                flex-direction:column;
+                align-items:flex-start;
+            }
+
+            .members-grid{
+                grid-template-columns:1fr;
+            }
+
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div class="header-container">
+
+    <div class="header-left">
+
+        <img src="{{ url_for('static', filename='logo.png') }}"
+             alt="Logo"
+             onerror="this.style.display='none'">
+
+        <div>
+
+            <h1>Cyber Defensive Engine</h1>
+
+            <div class="status-badge" id="main-status-badge">
+                <span class="pulse-dot" id="main-status-dot"></span>
+                <span id="main-status-text">System Live</span>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="theme-toggle" id="themeToggle">
+        <div class="toggle-ball"></div>
+    </div>
+
+</div>
+
+<div class="dashboard-grid">
+
+    <div class="card" style="grid-column:1/-1;">
+
+        <h3>Project Details</h3>
+
+        <ul class="details-list">
+
+            <li>
+                <strong>Institution:</strong>
+                Gurukul Kangri (Deemed to be University) Vishwavidyalaya
+            </li>
+
+            <li>
+                <strong>Supervisor:</strong>
+                Mr. Kuldeep
+            </li>
+
+            <li>
+                <strong>Team Members:</strong>
+
+                <div class="members-grid">
+                    <div>• Abhinandan (236301015)</div>
+                    <div>• Amritanshu Mishra (236301039)</div>
+                    <div>• Amul Jaiswal (236301040)</div>
+                    <div>• Harshit (236301099)</div>
+                </div>
+
+            </li>
+
+        </ul>
+
+    </div>
+
+    <div class="card">
+
+        <h3>Active Subsystems</h3>
+
+        <div style="margin-bottom:15px;">
+            <strong>Machine Learning Module:</strong><br>
+            <span class="tag ml" id="ml-status">
+                Isolation Forest: Loading...
+            </span>
+        </div>
+
+        <div style="margin-bottom:15px;">
+            <strong>Cryptography:</strong><br>
+            <span class="tag pqc">
+                PQC ML-DSA-44: Active
+            </span>
+        </div>
+
+        <div style="margin-bottom:15px;">
+            <strong>Honeypot / IPC:</strong><br>
+            <span class="tag honey">
+                Named Pipe Scan Detector: Active
+            </span>
+        </div>
+
+        <div>
+            <strong>Monitored System Logs:</strong><br>
+            <div id="log-monitors" style="margin-top:10px;"></div>
+        </div>
+
+    </div>
+
+    <div class="card">
+
+        <h3>Active Firewalled IPs</h3>
+
+        <ul class="ip-list" id="blocked-ip-list">
+
+            <li style="color:var(--muted); background:none;">
+                No malicious IPs currently blocked.
+            </li>
+
+        </ul>
+
+    </div>
+
+    <div class="card">
+
+        <h3>Monitoring Status</h3>
+
+        <table>
+
+            <tr>
+                <td>
+                    CPU Usage
+                    <div class="peak-stat">
+                        Peak:
+                        <span id="peak-cpu">0.0</span>%
+                    </div>
+                </td>
+
+                <td id="live-cpu-table" class="stat-value">
+                    0.0
+                </td>
+            </tr>
+
+            <tr>
+                <td>Total Attacks</td>
+
+                <td id="attack-count"
+                    class="stat-value"
+                    style="color:var(--yellow);">
+                    0
+                </td>
+            </tr>
+
+            <tr>
+                <td>Blocked IPs</td>
+
+                <td id="blocked-count"
+                    class="stat-value"
+                    style="color:var(--red);">
+                    0
+                </td>
+            </tr>
+
+        </table>
+
+    </div>
+
+    <div class="card">
+
+        <h3>Risk Assessment</h3>
+
+        <p>
+            Risk Score (CPU):
+            <span id="risk-score" class="stat-value">
+                0.0%
+            </span>
+        </p>
+
+        <br>
+
+        <p>
+            RAM Utilization:
+            <span id="ram-util" class="stat-value">
+                0.0%
+            </span>
+
+            <span class="peak-stat">
+                Peak:
+                <span id="peak-ram">0.0</span>%
+            </span>
+        </p>
+
+        <div style="margin-top:20px;">
+
+            <div style="display:flex; justify-content:space-between;">
+
+                <span>Anomaly Level</span>
+
+                <span id="anomaly-text">
+                    0%
+                </span>
+
+            </div>
+
+            <div class="progress-container">
+
+                <div id="anomaly-bar" class="progress-bar"></div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="card">
+
+        <h3>Live Activity Log</h3>
+
+        <div class="log-container" id="log-container">
+
+            <ul class="log-list" id="event-log">
+
+                <li class="log-info">
+                    <span class="log-time" id="init-time"></span>
+                    ⚙️ Defensive Engine Initialized.
+                </li>
+
+            </ul>
+
+        </div>
+
+    </div>
+
+    <div class="card">
+
+        <h3>Network Behavior Profiling</h3>
+
+        <div class="chart-container">
+            <canvas id="trafficChart"></canvas>
+        </div>
+
+    </div>
+
+    <div class="card">
+
+        <h3>Threat Level Gauge</h3>
+
+        <div class="chart-container">
+            <canvas id="gaugeChart"></canvas>
+        </div>
+
+        <div id="gauge-label">
+            System Safe
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+    const toggle = document.getElementById("themeToggle");
+
+    if(localStorage.getItem("theme") === "light"){
+        document.body.classList.add("light-theme");
+    }
+
+    toggle.addEventListener("click", () => {
+
+        document.body.classList.toggle("light-theme");
+
+        if(document.body.classList.contains("light-theme")){
+            localStorage.setItem("theme","light");
+        }
+        else{
+            localStorage.setItem("theme","dark");
+        }
+
+    });
+
+</script>
+
+<script src="{{ url_for('static', filename='dashboard.js') }}"></script>
+
+</body>
+</html>
