@@ -118,21 +118,19 @@ from any device on the network.
 Adaptive-Cyber-Defensive-Engine/
 │
 ├── main.py
-├── sniffer.cpp
-├── dashboard.js
-├── dashboard.html
+├── sniffer.cpp
+├── config.py
+├── model.pkl
+├── Cyber_Defensive_Engine.log
+│
 ├── static/
 │   ├── logo.png
-│   └── assets/
+│   └── dashboard.js
 │
 ├── templates/
+│   ├── setup.html
+│   ├── verify.html
 │   └── dashboard.html
-│
-├── models/
-│   └── isolation_forest.pkl
-│
-├── logs/
-│   └── engine.log
 │
 └── README.md
 ```
