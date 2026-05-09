@@ -37,8 +37,10 @@ if not os.path.exists(PIPE) :
 
 time.sleep(2)
 
+thread_lock = threading.Lock()
+
 app = Flask(__name__)
-app.secret_key = 'bce_p623_secret'
+app.secret_key = os.urandom(32)
 import logging
 
 log_werkzeug = logging.getLogger('werkzeug')
@@ -81,6 +83,10 @@ try:
 except FileNotFoundError:
     log.warning("Error: ./sniffer executable not found. Did you compile it?")
     exit(1)
+
+if sniffer.poll() is not None:
+    log.error("Sniffer process crashed!")
+    sys.exit(1)
 
 def load_user_config()  :
     with open("config.json", 'r') as f :
@@ -141,7 +147,10 @@ def setup():
 
         # 1. Generate Classic OTP
         otp_code = str(ran.randint(100000, 999999))
-        otp_s[session["email"]] = otp_code
+        otp_s[email_e] = {
+            "otp": otp_code,
+            "time": time.time()
+        }
 
         # 2. Generate Post-Quantum Signature for the OTP
         with open("/home/abhinandan-kali/Desktop/Cyber_Defensive_Engine/sniffer_private_key.bin", "rb") as f:
@@ -179,7 +188,9 @@ Cyber Defensive Engine
 @app.route("/verify", methods = ["GET", "POST"])
 def verify()    :
     if request.method == "POST"   :
-        if otp_s.get(session.get('email')) == request.form['otp']   :
+        otp_data = otp_s.get(session.get("email"))
+
+        if otp_data and otp_data["otp"] == request.form["otp"]:   
             with open ("config.json", 'w') as f:
                 json.dump({"name": session['name'], "email": session['email']}, f)
             return redirect("/dashboard")
@@ -200,6 +211,10 @@ def read_uds_packet(sock):
         if not header: return None
         # PQC Header: [Total Length (4b)] + [Sig Length (4b)] + [Packet Length (4b)]
         total_len, sig_len, pkt_len = struct.unpack('!III', header)
+        MAX_PACKET = 65535
+
+        if total_len <= 0 or total_len > MAX_PACKET:
+            return None
         
         data = b""
         # We only need the actual packet data for ML training
@@ -240,6 +255,7 @@ def connect_to_sniffer():
 
 def recv_exact(sock, size):
     data = b""
+    retries = 1
 
     while len(data) < size:
         try:
@@ -251,7 +267,9 @@ def recv_exact(sock, size):
             data += chunk
 
         except socket.timeout:
-            return None
+            if retries >= 15    : return None
+            retries += 1
+            continue
 
         except BlockingIOError:
             return None
@@ -262,7 +280,21 @@ def recv_exact(sock, size):
 
     return data
 
+def re_train_model(data_samples): 
+    global model, baseline_trainig
+
+    baseline_trainig = baseline_trainig + data_samples
+    if not data_samples:
+        data_samples = [[64, 1], [1500, 1]] # Dummy fallback
+    
+    new_model = IsolationForest(contamination=0.002)
+    new_model.fit(baseline_trainig)
+    model = new_model
+    joblib.dump(model, MODEL_FILE)
+    log.info(f"Model saved with {len(data_samples)} raw samples.")
+
 def train_model(total_duration):
+    global baseline_trainig
     log.info(f"ML Engine: Starting {total_duration/60:.1f} minute training baseline...")
     data_samples = []
     start_time = time.time()
@@ -286,13 +318,15 @@ def train_model(total_duration):
     if uds_sock :
         uds_sock.close()
     
+    baseline_trainig.append(data_samples)
+    
     if not data_samples:
         data_samples = [[64, 1], [1500, 1]] # Dummy fallback
 
     sys.stdout.write("\rTraining process is completed ready to detection")
     sys.stdout.flush()
     
-    model = IsolationForest(contamination=0.01)
+    model = IsolationForest(contamination=0.001)
     model.fit(data_samples)
     joblib.dump(model, MODEL_FILE)
     log.info(f"Model saved with {len(data_samples)} raw samples.")
@@ -312,9 +346,11 @@ def unsupervised_learning():
             log.info("Baseline training successful.")
         
 def detection():
-    global model, blocked_ips, attack_count
+    global model, blocked_ips, attack_count, last_alert_time
     # Wait for the ML model to be ready
     model_ready.wait()
+    ip = ""
+    re_training = []
 
     # Initialize PQC Verifier (Dilithium2) for packet authentication
     try:
@@ -342,7 +378,7 @@ def detection():
                 continue
             
             total_len, sig_len, pkt_len = struct.unpack('!III', header_data)
-
+            
             # 2. Read the full payload (Signature + Packet)
             payload = recv_exact(uds_sock, total_len)
 
@@ -359,11 +395,26 @@ def detection():
                 
                 if prediction[0] == -1:
                     ip = extract_source_ip(packet)
+
+                    if not ip or ip.startswith("192.168.") or ip.startswith("10.") or ip == "127.0.0.1" or ip == "0.0.0.0":
+                        continue
+
                     if ip and ip not in blocked_ips:
                         log.warning(f"ML ANOMALY: Blocking {ip} for abnormal behavior")
-                        os.system(f"sudo iptables -A INPUT -s {ip} -j DROP")
-                        blocked_ips.add(ip)
-                        attack_count += 1
+                        subprocess.run([
+                            "sudo",
+                            "iptables",
+                            "-C",
+                            "INPUT",
+                            "-s",
+                            ip,
+                            "-j",
+                            "DROP"
+                        ], check=True)
+                        with thread_lock :
+                            blocked_ips.add(ip)
+                            blocked_time[ip] = time.time()
+                            attack_count += 1
                         
                         # Define detection variables
                         detection_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -412,7 +463,18 @@ Cyber Defensive Engine
 AI-Driven Intrusion Prevention System
 """
                         # FIX: alert() is now inside the block where subject/body are defined
-                        alert(subject, body) 
+                        # Add a tracking dictionary at the top of main.py
+
+                        now = time.time()
+                        if ip not in last_alert_time or (now - last_alert_time[ip] > ALERT_COOLDOWN * 60):
+                            alert(subject, body)
+                            last_alert_time[ip] = now
+
+                else :
+                    re_training.append([len(packet), 1])
+                    if len(re_training) > 10000:
+                        re_training = re_training[-5000:]
+                        train_t = threading.Thread(target = re_train_model, args = (re_training, )).start()
 
             else:
                 log.error("PQC SECURITY ALERT: Received a tampered or unsigned packet!")
@@ -424,17 +486,37 @@ AI-Driven Intrusion Prevention System
             time.sleep(0.1) # Prevent CPU spiking on continuous errors
             continue
 
-def auto_unblock_system() :
-    while True :
+def auto_unblock_system():
+    while True:
         now = time.time()
-        for ip in list(blocked_ips) :
-            if now - blocked_time.get(ip, now) > BLOCK_COOLDOWN :
-                if platform.system() == "Linux" :
-                    os.system(f"sudo iptables -D INPUT -s {ip} -j DROP")
-                blocked_ips.remove(ip)
-                del blocked_time[ip]
-                risk_score[ip] = 0
-                log.info(f"Auto-unblocked IP: {ip}")
+        # list() is used to prevent "dictionary size changed during iteration" errors
+        for ip in list(blocked_ips):
+            # Retrieve the time the block started
+            start_time = blocked_time.get(ip)
+            
+            if start_time and (now - start_time > BLOCK_COOLDOWN):
+                if platform.system() == "Linux":
+                    # Remove the iptables DROP rule
+                    subprocess.run([
+                        "sudo",
+                        "iptables",
+                        "-D",
+                        "INPUT",
+                        "-s",
+                        ip,
+                        "-j",
+                        "DROP"
+                    ], check=True)
+                
+                # Cleanup internal tracking
+                with thread_lock :
+                    blocked_ips.remove(ip)
+                    if ip in blocked_time: del blocked_time[ip]
+                    risk_score[ip] = 0
+                
+                log.info(f"🔓 Auto-unblock: Timer expired for {ip}. Firewall rule removed.")
+        
+        # Check every 5 seconds to minimize CPU usage
         time.sleep(5)
 
 def pipe_monitoring():
@@ -466,9 +548,20 @@ def pipe_monitoring():
                         
                         if ip not in blocked_ips:
                             log.warning(f"HONEYPOT/SCAN TRIGGER: Blocking {ip}")
-                            os.system(f"sudo iptables -A INPUT -s {ip} -j DROP")
-                            blocked_ips.add(ip)
-                            attack_count += 1
+                            subprocess.run([
+                                "sudo",
+                                "iptables",
+                                "-C",
+                                "INPUT",
+                                "-s",
+                                ip,
+                                "-j",
+                                "DROP"
+                            ], check=True)
+                            with thread_lock :
+                                blocked_ips.add(ip)
+                                blocked_time[ip] = time.time()
+                                attack_count += 1
                             
                             # Prepare and send the Security Alert Email
                             detection_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
