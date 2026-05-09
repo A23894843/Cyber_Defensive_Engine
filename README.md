@@ -1,6 +1,6 @@
-# 🛡️ Adaptive Cyber Defensive Engine (v1.0)
+# 🛡️ Cyber Defensive Engine (v1.0)
 
-The **Adaptive Cyber Defensive Engine** is a high-performance, AI-driven **Intrusion Prevention System (IPS)** designed to autonomously monitor network traffic, detect anomalies, and mitigate threats in real-time.
+The **Cyber Defensive Engine** is a high-performance, AI-driven **Intrusion Prevention System (IPS)** designed to autonomously monitor network traffic, detect anomalies, and mitigate threats in real-time.
 
 It integrates **low-level packet processing**, **Post-Quantum Cryptography (PQC)**, and **Unsupervised Machine Learning** to provide robust defense against modern and future cyber threats.
 
