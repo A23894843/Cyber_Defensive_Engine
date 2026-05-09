@@ -283,7 +283,7 @@ def recv_exact(sock, size):
 def re_train_model(data_samples): 
     global model, baseline_trainig
 
-    baseline_trainig = baseline_trainig + data_samples
+    baseline_trainig.extend(data_samples)
     if not data_samples:
         data_samples = [[64, 1], [1500, 1]] # Dummy fallback
     
@@ -318,7 +318,7 @@ def train_model(total_duration):
     if uds_sock :
         uds_sock.close()
     
-    baseline_trainig.append(data_samples)
+    baseline_trainig.extend(data_samples)
     
     if not data_samples:
         data_samples = [[64, 1], [1500, 1]] # Dummy fallback
@@ -396,15 +396,17 @@ def detection():
                 if prediction[0] == -1:
                     ip = extract_source_ip(packet)
 
-                    if not ip or ip.startswith("192.168.") or ip.startswith("10.") or ip == "127.0.0.1" or ip == "0.0.0.0":
-                        continue
+                    trusted_prefixes = ["192.168.", "10.", "127.", "0.0.", "20.207.", "140.82."]
+                    
+                    if not ip or any(ip.startswith(p) for p in trusted_prefixes):
+                        continue # Skip blocking for these trusted sources
 
                     if ip and ip not in blocked_ips:
                         log.warning(f"ML ANOMALY: Blocking {ip} for abnormal behavior")
                         subprocess.run([
                             "sudo",
                             "iptables",
-                            "-C",
+                            "-A",
                             "INPUT",
                             "-s",
                             ip,
@@ -551,7 +553,7 @@ def pipe_monitoring():
                             subprocess.run([
                                 "sudo",
                                 "iptables",
-                                "-C",
+                                "-A",
                                 "INPUT",
                                 "-s",
                                 ip,
