@@ -156,7 +156,6 @@ def setup():
         with open("/home/abhinandan-kali/Desktop/Cyber_Defensive_Engine/sniffer_private_key.bin", "rb") as f:
             sk = f.read()
         
-        # FIX: Change "Dilithium2" to "ML-DSA-44" to match the generated key
         sig_instance = oqs.Signature("ML-DSA-44", secret_key=sk)
         
         signature = sig_instance.sign(otp_code.encode())
@@ -282,6 +281,8 @@ def recv_exact(sock, size):
 
 def re_train_model(data_samples): 
     global model, baseline_trainig
+
+    if len(baseline_trainig) >= 100000 : baseline_trainig = []
 
     baseline_trainig.extend(data_samples)
     if not data_samples:
