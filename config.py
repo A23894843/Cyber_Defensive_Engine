@@ -64,7 +64,7 @@ blocked_time = {}
 engine_status = "STABLE"
 
 sender_email = "cyberdefensiveengine@gmail.com"
-sender_password = "evtc fvce saiv vzur"
+sender_password = "your_gmail_app_password"
 name = None
 receiver_email = None
 
