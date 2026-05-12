@@ -4,624 +4,108 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Setup - Adaptive Cyber Defensive Engine</title>
-
+    <!-- Modern UI framework variables for Glassmorphism -->
     <style>
-
-        /* =========================================
-           CSS VARIABLES & THEMING
-           ========================================= */
-        :root{
-            --bg:#0f172a;
-            --bg2:#111827;
-
-            --card:rgba(255,255,255,0.08);
-            --border:rgba(255,255,255,0.12);
-
-            --text:#f8fafc;
-            --muted:#94a3b8;
-
-            --primary:#38bdf8;
-            --gold:#fbbf24;
-            --purple:#8b5cf6;
-
-            --shadow:0 10px 35px rgba(0,0,0,0.45);
-        }
-
-        body.light-theme{
-            --bg:#f1f5f9;
-            --bg2:#ffffff;
-
-            --card:rgba(255,255,255,0.75);
-            --border:rgba(15,23,42,0.08);
-
-            --text:#0f172a;
-            --muted:#475569;
-
-            --primary:#0284c7;
-            --gold:#d97706;
-            --purple:#7c3aed;
-
-            --shadow:0 10px 25px rgba(0,0,0,0.08);
-        }
-
-        *{
-            margin:0;
-            padding:0;
-            box-sizing:border-box;
-        }
-
-        /* =========================================
-           FULL-PAGE CENTERING & BACKGROUND
-           ========================================= */
-        body{
-
-            background:
-                radial-gradient(circle at top left,#1e293b 0%,transparent 25%),
-                radial-gradient(circle at bottom right,#0f172a 0%,transparent 25%),
-                linear-gradient(135deg,var(--bg),var(--bg2));
-
-            color:var(--text);
-
-            font-family:'Segoe UI',sans-serif;
-
-            min-height:100vh;
-
-            /* Flexbox ensures the setup card stays perfectly centered */
-            display:flex;
-            justify-content:center;
-            align-items:center;
-
-            padding:20px;
-
-            transition:0.4s ease;
-        }
-
-        body.light-theme{
-
-            background:
-                radial-gradient(circle at top left,#bfdbfe 0%,transparent 25%),
-                radial-gradient(circle at bottom right,#dbeafe 0%,transparent 25%),
-                linear-gradient(135deg,#f8fafc,#e2e8f0);
-
-        }
-
-        /* =========================================
-           SETUP CARD STYLING (Glassmorphism)
-           ========================================= */
-        .setup-container{
-
-            width:100%;
-            max-width:540px; /* Restrict width for readability */
-
-            background:var(--card);
-
-            border:1px solid var(--border);
-
-            backdrop-filter:blur(20px);
-
-            border-radius:28px;
-
-            padding:40px;
-
-            box-shadow:var(--shadow);
-
-            position:relative;
-
-            overflow:hidden;
-
-            animation:fadeIn 0.7s ease; /* Fade-in effect on load */
-        }
-
-        /* Gradient strip at the top of the card */
-        .setup-container::before{
-
-            content:"";
-
-            position:absolute;
-
-            top:0;
-            left:0;
-
-            width:100%;
-            height:5px;
-
-            background:linear-gradient(
-                to right,
-                var(--primary),
-                var(--purple),
-                var(--gold)
-            );
-        }
-
-        @keyframes fadeIn{
-
-            from{
-                opacity:0;
-                transform:translateY(20px);
-            }
-
-            to{
-                opacity:1;
-                transform:translateY(0);
-            }
-
-        }
-
-        /* =========================================
-           TOP BAR (Status & Theme)
-           ========================================= */
-        .top-bar{
-
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
-
-            margin-bottom:30px;
-        }
-
-        .status-badge{
-
-            display:flex;
-            align-items:center;
-            gap:10px;
-
-            padding:10px 18px;
-
-            border-radius:50px;
-
-            background:rgba(56,189,248,0.12);
-
-            border:1px solid rgba(56,189,248,0.35);
-
-            color:var(--primary);
-
-            font-size:0.85rem;
-
-            font-weight:600;
-        }
-
-        .pulse-dot{
-
-            width:10px;
-            height:10px;
-
-            border-radius:50%;
-
-            background:var(--primary);
-
-            animation:pulse 1.5s infinite;
-        }
-
-        @keyframes pulse{
-
-            0%{
-                box-shadow:0 0 0 0 rgba(56,189,248,0.7);
-            }
-
-            70%{
-                box-shadow:0 0 0 10px rgba(56,189,248,0);
-            }
-
-            100%{
-                box-shadow:0 0 0 0 rgba(56,189,248,0);
-            }
-
-        }
-
-        .theme-toggle{
-
-            width:72px;
-            height:38px;
-
-            border-radius:40px;
-
-            background:rgba(255,255,255,0.08);
-
-            border:1px solid var(--border);
-
-            display:flex;
-            align-items:center;
-
-            padding:4px;
-
-            position:relative;
-
-            cursor:pointer;
-        }
-
-        .theme-toggle::before{
-            content:"☀️";
-            position:absolute;
-            left:8px;
-            font-size:13px;
-        }
-
-        .theme-toggle::after{
-            content:"🌙";
-            position:absolute;
-            right:8px;
-            font-size:13px;
-        }
-
-        .toggle-ball{
-
-            width:28px;
-            height:28px;
-
-            border-radius:50%;
-
-            background:linear-gradient(
-                135deg,
-                var(--primary),
-                var(--purple)
-            );
-
-            transition:0.3s ease;
-
-            z-index:2;
-        }
-
-        body.light-theme .toggle-ball{
-            transform:translateX(34px);
-        }
-
-        /* =========================================
-           LOGO & HEADINGS
-           ========================================= */
-        .logo-section{
-
-            text-align:center;
-
-            margin-bottom:35px;
-        }
-
-        .logo{
-
-            width:90px;
-            height:90px;
-
-            border-radius:24px;
-
-            object-fit:cover;
-
-            margin-bottom:18px;
-
-            box-shadow:0 0 35px rgba(56,189,248,0.4);
-        }
-
-        h1{
-
-            font-size:2rem;
-            font-weight:700;
-
-            background:linear-gradient(
-                to right,
-                var(--primary),
-                var(--purple)
-            );
-
-            -webkit-background-clip:text;
-            -webkit-text-fill-color:transparent;
-
-            margin-bottom:10px;
-        }
-
-        .subtitle{
-
-            color:var(--muted);
-
-            font-size:0.95rem;
-
-            line-height:1.7;
-        }
-
-        /* =========================================
-           FORM INPUTS & BUTTONS
-           ========================================= */
-        .form-group{
-            margin-bottom:24px;
-        }
-
-        label{
-
-            display:block;
-
-            margin-bottom:10px;
-
-            color:var(--gold);
-
-            font-size:0.9rem;
-
-            font-weight:600;
-
-            letter-spacing:0.5px;
-        }
-
-        input{
-
-            width:100%;
-
-            padding:15px 18px;
-
-            border-radius:16px;
-
-            border:1px solid var(--border);
-
-            background:rgba(255,255,255,0.04);
-
-            color:var(--text);
-
-            font-size:0.95rem;
-
-            outline:none;
-
-            transition:0.3s ease;
-        }
-
-        /* Neon focus state for inputs */
-        input:focus{
-
-            border-color:var(--primary);
-
-            box-shadow:0 0 15px rgba(56,189,248,0.25);
-        }
-
-        input::placeholder{
-            color:var(--muted);
-        }
-
-        button{
-
-            width:100%;
-
-            padding:16px;
-
-            border:none;
-
-            border-radius:18px;
-
-            background:linear-gradient(
-                135deg,
-                var(--primary),
-                var(--purple)
-            );
-
-            color:white;
-
-            font-weight:700;
-
-            font-size:0.95rem;
-
-            letter-spacing:0.5px;
-
-            cursor:pointer;
-
-            transition:0.3s ease;
-
-            margin-top:10px;
-
-            box-shadow:0 10px 25px rgba(56,189,248,0.25);
-        }
-
-        button:hover{
-
-            transform:translateY(-3px); /* Button lift effect */
-
-            box-shadow:0 15px 35px rgba(56,189,248,0.45);
-        }
-
-        /* =========================================
-           INFORMATIONAL SECURITY GRID
-           ========================================= */
-        .security-grid{
-
-            display:grid;
-
-            grid-template-columns:1fr 1fr; /* 2 columns for info cards */
-
-            gap:14px;
-
-            margin-top:28px;
-        }
-
-        .mini-card{
-
-            background:rgba(255,255,255,0.04);
-
-            border:1px solid var(--border);
-
-            border-radius:18px;
-
-            padding:16px;
-
-            text-align:center;
-        }
-
-        .mini-card h3{
-
-            font-size:0.9rem;
-
-            color:var(--primary);
-
-            margin-bottom:6px;
-        }
-
-        .mini-card p{
-
-            font-size:0.78rem;
-
-            color:var(--muted);
-        }
-
-        .footer-note{
-
-            margin-top:28px;
-
-            text-align:center;
-
-            color:var(--muted);
-
-            font-size:0.78rem;
-
-            line-height:1.8;
-        }
-
-        /* Responsive Design for Mobile Setup */
-        @media(max-width:600px){
-
-            .setup-container{
-                padding:30px 22px;
-            }
-
-            h1{
-                font-size:1.6rem;
-            }
-
-            .security-grid{
-                grid-template-columns:1fr; /* Single column on mobile */
-            }
-
-        }
-
+        :root{ --bg:#0f172a; --bg2:#111827; --card:rgba(255,255,255,0.08); --border:rgba(255,255,255,0.12); --text:#f8fafc; --muted:#94a3b8; --primary:#38bdf8; --gold:#fbbf24; --purple:#8b5cf6; --shadow:0 10px 35px rgba(0,0,0,0.45); }
+        body.light-theme{ --bg:#f1f5f9; --bg2:#ffffff; --card:rgba(255,255,255,0.75); --border:rgba(15,23,42,0.08); --text:#0f172a; --muted:#475569; --primary:#0284c7; --gold:#d97706; --purple:#7c3aed; --shadow:0 10px 25px rgba(0,0,0,0.08); }
+        *{ margin:0; padding:0; box-sizing:border-box; }
+        body{ background: radial-gradient(circle at top left,#1e293b 0%,transparent 25%), radial-gradient(circle at bottom right,#0f172a 0%,transparent 25%), linear-gradient(135deg,var(--bg),var(--bg2)); color:var(--text); font-family:'Segoe UI',sans-serif; min-height:100vh; display:flex; justify-content:center; align-items:center; padding:20px; transition:0.4s ease; }
+        body.light-theme{ background: radial-gradient(circle at top left,#bfdbfe 0%,transparent 25%), radial-gradient(circle at bottom right,#dbeafe 0%,transparent 25%), linear-gradient(135deg,#f8fafc,#e2e8f0); }
+        
+        .setup-container{ width:100%; max-width:540px; background:var(--card); border:1px solid var(--border); backdrop-filter:blur(20px); border-radius:28px; padding:40px; box-shadow:var(--shadow); position:relative; overflow:hidden; animation:fadeIn 0.7s ease; }
+        .setup-container::before{ content:""; position:absolute; top:0; left:0; width:100%; height:5px; background:linear-gradient(to right, var(--primary), var(--purple), var(--gold)); }
+        @keyframes fadeIn{ from{ opacity:0; transform:translateY(20px); } to{ opacity:1; transform:translateY(0); } }
+        
+        .top-bar{ display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; }
+        .status-badge{ display:flex; align-items:center; gap:10px; padding:10px 18px; border-radius:50px; background:rgba(56,189,248,0.12); border:1px solid rgba(56,189,248,0.35); color:var(--primary); font-size:0.85rem; font-weight:600; }
+        .pulse-dot{ width:10px; height:10px; border-radius:50%; background:var(--primary); animation:pulse 1.5s infinite; }
+        @keyframes pulse{ 0%{ box-shadow:0 0 0 0 rgba(56,189,248,0.7); } 70%{ box-shadow:0 0 0 10px rgba(56,189,248,0); } 100%{ box-shadow:0 0 0 0 rgba(56,189,248,0); } }
+        
+        /* Theme Toggling logic */
+        .theme-toggle{ width:72px; height:38px; border-radius:40px; background:rgba(255,255,255,0.08); border:1px solid var(--border); display:flex; align-items:center; padding:4px; position:relative; cursor:pointer; }
+        .theme-toggle::before{ content:"☀️"; position:absolute; left:8px; font-size:13px; }
+        .theme-toggle::after{ content:"🌙"; position:absolute; right:8px; font-size:13px; }
+        .toggle-ball{ width:28px; height:28px; border-radius:50%; background:linear-gradient(135deg, var(--primary), var(--purple)); transition:0.3s ease; z-index:2; }
+        body.light-theme .toggle-ball{ transform:translateX(34px); }
+        
+        .logo-section{ text-align:center; margin-bottom:35px; }
+        .logo{ width:90px; height:90px; border-radius:24px; object-fit:cover; margin-bottom:18px; box-shadow:0 0 35px rgba(56,189,248,0.4); }
+        h1{ font-size:2rem; font-weight:700; background:linear-gradient(to right, var(--primary), var(--purple)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:10px; }
+        .subtitle{ color:var(--muted); font-size:0.95rem; line-height:1.7; }
+        
+        /* Form Inputs */
+        .form-group{ margin-bottom:24px; }
+        label{ display:block; margin-bottom:10px; color:var(--gold); font-size:0.9rem; font-weight:600; letter-spacing:0.5px; }
+        input{ width:100%; padding:15px 18px; border-radius:16px; border:1px solid var(--border); background:rgba(255,255,255,0.04); color:var(--text); font-size:0.95rem; outline:none; transition:0.3s ease; }
+        input:focus{ border-color:var(--primary); box-shadow:0 0 15px rgba(56,189,248,0.25); }
+        input::placeholder{ color:var(--muted); }
+        
+        button{ width:100%; padding:16px; border:none; border-radius:18px; background:linear-gradient(135deg, var(--primary), var(--purple)); color:white; font-weight:700; font-size:0.95rem; letter-spacing:0.5px; cursor:pointer; transition:0.3s ease; margin-top:10px; box-shadow:0 10px 25px rgba(56,189,248,0.25); }
+        button:hover{ transform:translateY(-3px); box-shadow:0 15px 35px rgba(56,189,248,0.45); }
+        
+        .security-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:28px; }
+        .mini-card{ background:rgba(255,255,255,0.04); border:1px solid var(--border); border-radius:18px; padding:16px; text-align:center; }
+        .mini-card h3{ font-size:0.9rem; color:var(--primary); margin-bottom:6px; }
+        .mini-card p{ font-size:0.78rem; color:var(--muted); }
+        .footer-note{ margin-top:28px; text-align:center; color:var(--muted); font-size:0.78rem; line-height:1.8; }
+        
+        @media(max-width:600px){ .setup-container{ padding:30px 22px; } h1{ font-size:1.6rem; } .security-grid{ grid-template-columns:1fr; } }
     </style>
 </head>
-
 <body>
 
-<!-- Main Centered Setup Dialog Box -->
 <div class="setup-container">
-
     <div class="top-bar">
-
-        <div class="status-badge">
-            <span class="pulse-dot"></span>
-            Secure Setup Environment
-        </div>
-
-        <div class="theme-toggle" id="themeToggle">
-            <div class="toggle-ball"></div>
-        </div>
-
+        <div class="status-badge"><span class="pulse-dot"></span>Secure Setup Environment</div>
+        <div class="theme-toggle" id="themeToggle"><div class="toggle-ball"></div></div>
     </div>
-
-    <!-- System Identity and Branding -->
+    
     <div class="logo-section">
-
-        <img
-            src="{{ url_for('static', filename='logo.png') }}"
-            class="logo"
-            alt="logo"
-            onerror="this.style.display='none'"
-        >
-
+        <img src="{{ url_for('static', filename='logo.png') }}" class="logo" alt="logo" onerror="this.style.display='none'">
         <h1>Adaptive Cyber Defensive Engine</h1>
-
-        <p class="subtitle">
-            AI-Powered Intrusion Prevention System<br>
-            Project BCE-P663 | GKV Haridwar
-        </p>
-
+        <p class="subtitle">AI-Powered Intrusion Prevention System<br>Project BCE-P663 | GKV Haridwar</p>
     </div>
-
-    <!-- Data Collection Form: Triggers POST request to Flask backend (/setup) to init session and trigger OTP generation -->
+    
+    <!-- Setup Form: Sends Initial Admin configurations to backend -->
     <form action="/setup" method="POST">
-
         <div class="form-group">
-
-            <label for="name">
-                ADMINISTRATOR NAME
-            </label>
-
-            <!-- Input fields require completion before submission -->
-            <input
-                type="text"
-                id="name"
-                name="name"
-                placeholder="Enter administrator name"
-                required
-            >
-
+            <label for="name">ADMINISTRATOR NAME</label>
+            <input type="text" id="name" name="name" placeholder="Enter administrator name" required>
         </div>
-
         <div class="form-group">
-
-            <label for="email">
-                ALERT RECEIVER EMAIL
-            </label>
-
-            <input
-                type="email"
-                id="email"
-                name="email"
-                placeholder="admin@security-node.com"
-                required
-            >
-
+            <label for="email">ALERT RECEIVER EMAIL</label>
+            <input type="email" id="email" name="email" placeholder="admin@security-node.com" required>
         </div>
-
-        <button type="submit">
-            INITIALIZE ENGINE & SEND OTP
-        </button>
-
+        
+        <!-- Secure Password Requirement -->
+        <div class="form-group">
+            <label for="password">ADMINISTRATOR PASSWORD</label>
+            <input type="password" id="password" name="password" placeholder="Create a strong password" required>
+        </div>
+        
+        <button type="submit">INITIALIZE ENGINE & SEND OTP</button>
     </form>
-
-    <!-- UI Component: Feature breakdown of the system -->
+    
+    <!-- Feature Breakdown Highlights -->
     <div class="security-grid">
-
-        <div class="mini-card">
-            <h3>PQC Security</h3>
-            <p>ML-DSA-44 Enabled</p>
-        </div>
-
-        <div class="mini-card">
-            <h3>AI Detection</h3>
-            <p>Isolation Forest Active</p>
-        </div>
-
-        <div class="mini-card">
-            <h3>Live Monitoring</h3>
-            <p>Real-Time Threat Analysis</p>
-        </div>
-
-        <div class="mini-card">
-            <h3>Firewall Engine</h3>
-            <p>iptables Automated Defense</p>
-        </div>
-
+        <div class="mini-card"><h3>PQC Security</h3><p>ML-DSA-44 Enabled</p></div>
+        <div class="mini-card"><h3>AI Detection</h3><p>Isolation Forest Active</p></div>
+        <div class="mini-card"><h3>Live Monitoring</h3><p>Real-Time Threat Analysis</p></div>
+        <div class="mini-card"><h3>Firewall Engine</h3><p>iptables Automated Defense</p></div>
     </div>
-
-    <div class="footer-note">
-
-        ADAPTIVE CYBER DEFENSIVE ENGINE v1.0<br>
-        SECURE ENVIRONMENT DETECTED // GURUKUL KANGRI UNIVERSITY
-
-    </div>
-
+    
+    <div class="footer-note">ADAPTIVE CYBER DEFENSIVE ENGINE v1.0<br>SECURE ENVIRONMENT DETECTED // GURUKUL KANGRI UNIVERSITY</div>
 </div>
 
-<!-- Theme persistence logic, identical to main dashboard -->
 <script>
-
+    // Handles toggling CSS class to render Dark/Light mode universally
     const toggle = document.getElementById("themeToggle");
-
-    if(localStorage.getItem("theme") === "light"){
-        document.body.classList.add("light-theme");
-    }
-
+    if(localStorage.getItem("theme") === "light"){ document.body.classList.add("light-theme"); }
     toggle.addEventListener("click", () => {
-
         document.body.classList.toggle("light-theme");
-
-        if(document.body.classList.contains("light-theme")){
-            localStorage.setItem("theme","light");
-        }
-        else{
-            localStorage.setItem("theme","dark");
-        }
-
+        if(document.body.classList.contains("light-theme")){ localStorage.setItem("theme","light"); }
+        else{ localStorage.setItem("theme","dark"); }
     });
-
 </script>
-
 </body>
 </html>
