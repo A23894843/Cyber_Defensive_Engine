@@ -252,7 +252,23 @@ def setup():
             pqc_signature_hex = "ERROR_LOADING_KEY_FALLBACK"
 
         subject = "Post-Quantum Authenticated Verification"
-        body = f"""Dear {name_e},\n\nYour Cyber Defensive Engine has generated a Quantum-Resistant OTP for your registration.\n\nOTP Verification Code: {otp_code}\n\n--------------------------------------------------\n🔐 PQC Authentication Details:\n• Algorithm: Dilithium2 (ML-DSA)\n• Signature Fragment: {pqc_signature_hex}...\n--------------------------------------------------\n\nThis signature ensures the integrity of this communication against quantum computing threats.\n\nBest regards,\nCyber Defensive Engine"""
+        body = f"""Dear {name_e},
+
+Your Cyber Defensive Engine has generated a Quantum-Resistant OTP for your registration.
+
+OTP Verification Code: {otp_code}
+
+--------------------------------------------------
+🔐 PQC Authentication Details:
+• Algorithm: Dilithium2 (ML-DSA)
+• Signature Fragment: {pqc_signature_hex}...
+--------------------------------------------------
+
+This signature ensures the integrity of this communication against quantum computing threats.
+
+Best regards,
+Cyber Defensive Engine
+"""
         alert(subject, body, email_e)
         return redirect("/verify")
     return render_template("setup.html")
@@ -548,7 +564,42 @@ def detection():
                         admin_name = config.get("name", "Administrator")
 
                         subject = f"🧠 ML ANOMALY: Behavioral Block Implemented for {ip}"
-                        body = f"Dear {admin_name},\n\n🚨 Machine Learning Security Alert\n\nOur Cyber Defensive Engine's AI module has detected a significant deviation from your network's normal traffic baseline. The source IP has been blocked based on behavioral patterns rather than a static signature.\n\n--------------------------------------------------\n🔍 Incident Details:\n• Event Type       : Traffic Anomaly Detected\n• Detection Method : Isolation Forest (Unsupervised ML)\n• Detection Time   : {detection_time}\n• Source IP        : {ip}\n--------------------------------------------------\n\nStay secure,  \nCyber Defensive Engine"
+                        body = f"""Dear {admin_name},
+
+🚨 Machine Learning Security Alert
+
+Our Cyber Defensive Engine's AI module has detected a significant deviation from your network's normal traffic baseline. The source IP has been blocked based on behavioral patterns rather than a static signature.
+
+--------------------------------------------------
+🔍 Incident Details:
+• Event Type       : Traffic Anomaly Detected
+• Detection Method : Isolation Forest (Unsupervised ML)
+• Detection Time   : {detection_time}
+• Source IP        : {ip}
+--------------------------------------------------
+
+🚫 Automatic Defensive Action Taken:
+The identified source IP address has been BLOCKED due to abnormal packet characteristics that match known DDoS or data exfiltration profiles.
+
+🧠 ML Analysis Results:
+• Anomaly Score    : Outside Normal Threshold
+• Packet Metric    : Observed size {packet_size} bytes
+• Behavior         : High-frequency burst or irregular payload size
+
+🛡️ Current Status:
+• Threat Mitigation Active ✔️
+• IP Successfully Blocked ✔️
+• Behavioral Monitoring Ongoing ✔️
+
+🔐 Recommended Actions:
+• Review the IP to ensure it is not a legitimate business partner (False Positive Check).
+• If the IP is a known internal service, consider adding it to the whitelist in config.py.
+• Monitor for similar anomalies from different IP ranges.
+
+Stay secure,  
+Cyber Defensive Engine  
+AI-Driven Intrusion Prevention System
+"""
 
                         # Send Email Alert (w/ Cooldown)
                         now = time.time()
@@ -629,7 +680,38 @@ def pipe_monitoring():
                             
                             detection_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                             subject = f"🚨 IMMEDIATE ACTION: Port Scan Detected from {ip}"
-                            body = f"Dear Administrator,\n\n🚨 High-Fidelity Security Alert\n\nThe Cyber Defensive Engine has detected a deterministic Port Scan via the Honeypot/Pipe monitoring layer. Because this layer monitors non-production decoys, this interaction is classified as 100% malicious.\n\n--------------------------------------------------\n🔍 Incident Details:\n• Event Type       : Deterministic Port Scan\n• Source IP        : {ip}\n• Detection Time   : {detection_time}\n• Targeted Ports   : {port_count} ports detected\n--------------------------------------------------\n\nStay secure,  \nCyber Defensive Engine"
+                            
+                            # Body content following your established professional/technical tone
+                            body = f"""Dear {name},
+
+🚨 High-Fidelity Security Alert
+
+The Cyber Defensive Engine has detected a deterministic Port Scan via the Honeypot/Pipe monitoring layer. Because this layer monitors non-production decoys, this interaction is classified as 100% malicious.
+
+--------------------------------------------------
+🔍 Incident Details:
+• Event Type       : Deterministic Port Scan
+• Source IP        : {ip}
+• Detection Time   : {detection_time}
+• Targeted Ports   : {port_count} ports detected  <-- FIX: Use port_count here
+--------------------------------------------------
+
+🚫 Automatic Defensive Action Taken:
+The source IP has been IDENTIFIED and BLOCKED using system iptables. All further traffic from this host is currently dropped at the network perimeter.
+
+🛡️ Current Status:
+• Threat Contained: YES
+• IP Blocked: {ip}
+• Risk Score: 100/100 (Immediate Threat)
+
+🔐 Recommended Actions:
+• Review your internal logs to ensure this IP did not attempt to access production assets.
+• No manual intervention is required for the current block; the auto-unblock system will manage the cooldown period.
+
+Stay secure,  
+Cyber Defensive Engine  
+Automated Intrusion Prevention System
+"""
                             alert(subject, body, load_user_config().get("email"))
                             play_alert_sound() 
         except Exception as e:
@@ -671,7 +753,46 @@ def monitor_file(file):
                     log_attack_to_db("Localhost", "LOG ANOMALY", f"Suspicious activity detected in system log: {file}")
 
                     subject = f"⚠️ Security Alert: Suspicious Activity Detected in System Logs"
-                    body = f"Dear Administrator,\n\n🚨 Security Alert Notification\n\nOur monitoring system has detected suspicious activity in your system logs that may indicate a potential security threat.\n\n--------------------------------------------------\n🔍 Incident Details:\n• Event Type       : Suspicious Log Activity  \n• Log File         : {file}  \n• Detection Time   : {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}  \n--------------------------------------------------\n\n🧠 Detected Indicators:\n• Multiple failed authentication attempts  \n• Unusual access patterns  \n• Repeated suspicious entries in logs  \n\nStay secure,  \nCyber Defensive Engine"
+                    body = f"""Dear {name},
+
+🚨 Security Alert Notification
+
+Our monitoring system has detected suspicious activity in your system logs that may indicate a potential security threat.
+
+--------------------------------------------------
+🔍 Incident Details:
+• Event Type       : Suspicious Log Activity  
+• Log File         : {file}  
+• Detection Time   : {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}  
+--------------------------------------------------
+
+🧠 Detected Indicators:
+• Multiple failed authentication attempts  
+• Unusual access patterns  
+• Repeated suspicious entries in logs  
+
+⚠️ Risk Assessment:
+This activity may indicate a brute-force attack, unauthorized access attempt, or misuse of system privileges.
+
+🛡️ Current Status:
+• Monitoring Active ✔️  
+• Threat Under Observation ✔️  
+• System Stable ✔️  
+
+🔐 Recommended Actions:
+• Review the affected log file immediately  
+• Check for unauthorized login attempts  
+• Change passwords if necessary  
+• Strengthen authentication mechanisms  
+
+If this activity was not initiated by you, immediate action is recommended.
+
+---
+
+Stay secure,  
+Cyber Defensive Engine  
+Automated Log Monitoring System
+"""
                     alert(subject, body, load_user_config().get("email"))
 
 # ==========================================
