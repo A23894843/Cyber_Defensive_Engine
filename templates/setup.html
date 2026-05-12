@@ -7,6 +7,9 @@
 
     <style>
 
+        /* =========================================
+           CSS VARIABLES & THEMING
+           ========================================= */
         :root{
             --bg:#0f172a;
             --bg2:#111827;
@@ -47,6 +50,9 @@
             box-sizing:border-box;
         }
 
+        /* =========================================
+           FULL-PAGE CENTERING & BACKGROUND
+           ========================================= */
         body{
 
             background:
@@ -60,6 +66,7 @@
 
             min-height:100vh;
 
+            /* Flexbox ensures the setup card stays perfectly centered */
             display:flex;
             justify-content:center;
             align-items:center;
@@ -78,10 +85,13 @@
 
         }
 
+        /* =========================================
+           SETUP CARD STYLING (Glassmorphism)
+           ========================================= */
         .setup-container{
 
             width:100%;
-            max-width:540px;
+            max-width:540px; /* Restrict width for readability */
 
             background:var(--card);
 
@@ -99,9 +109,10 @@
 
             overflow:hidden;
 
-            animation:fadeIn 0.7s ease;
+            animation:fadeIn 0.7s ease; /* Fade-in effect on load */
         }
 
+        /* Gradient strip at the top of the card */
         .setup-container::before{
 
             content:"";
@@ -136,6 +147,9 @@
 
         }
 
+        /* =========================================
+           TOP BAR (Status & Theme)
+           ========================================= */
         .top-bar{
 
             display:flex;
@@ -251,6 +265,9 @@
             transform:translateX(34px);
         }
 
+        /* =========================================
+           LOGO & HEADINGS
+           ========================================= */
         .logo-section{
 
             text-align:center;
@@ -298,6 +315,9 @@
             line-height:1.7;
         }
 
+        /* =========================================
+           FORM INPUTS & BUTTONS
+           ========================================= */
         .form-group{
             margin-bottom:24px;
         }
@@ -338,6 +358,7 @@
             transition:0.3s ease;
         }
 
+        /* Neon focus state for inputs */
         input:focus{
 
             border-color:var(--primary);
@@ -384,16 +405,19 @@
 
         button:hover{
 
-            transform:translateY(-3px);
+            transform:translateY(-3px); /* Button lift effect */
 
             box-shadow:0 15px 35px rgba(56,189,248,0.45);
         }
 
+        /* =========================================
+           INFORMATIONAL SECURITY GRID
+           ========================================= */
         .security-grid{
 
             display:grid;
 
-            grid-template-columns:1fr 1fr;
+            grid-template-columns:1fr 1fr; /* 2 columns for info cards */
 
             gap:14px;
 
@@ -442,6 +466,7 @@
             line-height:1.8;
         }
 
+        /* Responsive Design for Mobile Setup */
         @media(max-width:600px){
 
             .setup-container{
@@ -453,7 +478,7 @@
             }
 
             .security-grid{
-                grid-template-columns:1fr;
+                grid-template-columns:1fr; /* Single column on mobile */
             }
 
         }
@@ -463,6 +488,7 @@
 
 <body>
 
+<!-- Main Centered Setup Dialog Box -->
 <div class="setup-container">
 
     <div class="top-bar">
@@ -478,6 +504,7 @@
 
     </div>
 
+    <!-- System Identity and Branding -->
     <div class="logo-section">
 
         <img
@@ -496,6 +523,7 @@
 
     </div>
 
+    <!-- Data Collection Form: Triggers POST request to Flask backend (/setup) to init session and trigger OTP generation -->
     <form action="/setup" method="POST">
 
         <div class="form-group">
@@ -504,6 +532,7 @@
                 ADMINISTRATOR NAME
             </label>
 
+            <!-- Input fields require completion before submission -->
             <input
                 type="text"
                 id="name"
@@ -536,6 +565,7 @@
 
     </form>
 
+    <!-- UI Component: Feature breakdown of the system -->
     <div class="security-grid">
 
         <div class="mini-card">
@@ -569,6 +599,7 @@
 
 </div>
 
+<!-- Theme persistence logic, identical to main dashboard -->
 <script>
 
     const toggle = document.getElementById("themeToggle");
