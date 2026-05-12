@@ -5,11 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Cyber Defensive Engine - Dashboard</title>
 
+    <!-- Import Chart.js for real-time traffic and threat level visualizations -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
 
+        /* =========================================
+           CSS VARIABLES & THEME DEFINITIONS
+           ========================================= */
         :root{
+            /* Default Dark Theme Colors */
             --bg:#0f172a;
             --bg2:#111827;
             --card:rgba(255,255,255,0.08);
@@ -17,6 +22,7 @@
             --text:#f8fafc;
             --muted:#94a3b8;
 
+            /* Accent Colors for Status Indicators */
             --primary:#38bdf8;
             --green:#22c55e;
             --red:#ef4444;
@@ -26,6 +32,7 @@
             --shadow:0 8px 30px rgba(0,0,0,0.35);
         }
 
+        /* Light Theme Overrides (Toggled via JS) */
         body.light-theme{
             --bg:#f1f5f9;
             --bg2:#ffffff;
@@ -43,13 +50,18 @@
             --shadow:0 8px 25px rgba(0,0,0,0.08);
         }
 
+        /* Reset default browser margins */
         *{
             margin:0;
             padding:0;
             box-sizing:border-box;
         }
 
+        /* =========================================
+           MAIN LAYOUT & BACKGROUNDS
+           ========================================= */
         body{
+            /* Dynamic gradient background for a modern cyber-security aesthetic */
             background:
                     radial-gradient(circle at top left,#1e293b 0%,transparent 25%),
                     radial-gradient(circle at bottom right,#0f172a 0%,transparent 25%),
@@ -59,7 +71,7 @@
             font-family:'Segoe UI',sans-serif;
             min-height:100vh;
             padding:30px;
-            transition:0.4s ease;
+            transition:0.4s ease; /* Smooth transition for theme switching */
         }
 
         body.light-theme{
@@ -69,6 +81,7 @@
                     linear-gradient(135deg,#f8fafc,#e2e8f0);
         }
 
+        /* Header Layout: Flexbox for responsive alignment */
         .header-container{
             display:flex;
             justify-content:space-between;
@@ -91,6 +104,7 @@
             box-shadow:0 0 25px rgba(56,189,248,0.5);
         }
 
+        /* Gradient Text Effect for Main Title */
         h1{
             font-size:2.3rem;
             font-weight:700;
@@ -100,6 +114,9 @@
             letter-spacing:1px;
         }
 
+        /* =========================================
+           STATUS BADGES & ANIMATIONS
+           ========================================= */
         .status-badge{
             display:inline-flex;
             align-items:center;
@@ -115,6 +132,7 @@
             backdrop-filter:blur(10px);
         }
 
+        /* Pulsing dot animation for live status indication */
         .pulse-dot{
             width:10px;
             height:10px;
@@ -135,6 +153,9 @@
             }
         }
 
+        /* =========================================
+           THEME TOGGLE SWITCH
+           ========================================= */
         .theme-toggle{
             width:72px;
             height:38px;
@@ -176,12 +197,17 @@
             transform:translateX(34px);
         }
 
+        /* =========================================
+           DASHBOARD GRID SYSTEM
+           ========================================= */
+        /* Automatically creates responsive columns based on screen width */
         .dashboard-grid{
             display:grid;
             grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
             gap:24px;
         }
 
+        /* Glassmorphism styling for individual dashboard panels */
         .card{
             background:var(--card);
             border:1px solid var(--border);
@@ -195,9 +221,10 @@
         }
 
         .card:hover{
-            transform:translateY(-6px);
+            transform:translateY(-6px); /* Subtle lift effect on hover */
         }
 
+        /* Decorative top border for cards */
         .card::before{
             content:"";
             position:absolute;
@@ -214,6 +241,7 @@
             color:var(--text);
         }
 
+        /* Table styling for Monitoring Status */
         table{
             width:100%;
             border-collapse:collapse;
@@ -235,6 +263,9 @@
             font-size:0.85rem;
         }
 
+        /* =========================================
+           TAGS, PROGRESS BARS, AND LISTS
+           ========================================= */
         .tag{
             display:inline-block;
             padding:8px 14px;
@@ -245,6 +276,7 @@
             font-weight:600;
         }
 
+        /* Subsystem specific tag colors */
         .tag.ml{
             background:rgba(56,189,248,0.15);
             color:var(--primary);
@@ -260,6 +292,7 @@
             color:var(--yellow);
         }
 
+        /* Progress bar for Anomaly Detection/Risk */
         .progress-container{
             width:100%;
             height:12px;
@@ -277,6 +310,7 @@
             border-radius:20px;
         }
 
+        /* Live Activity Log Container */
         .log-container{
             max-height:180px;
             overflow-y:auto;
@@ -297,6 +331,7 @@
             margin-right:10px;
         }
 
+        /* Log Entry Severity Colors */
         .log-warning{
             color:var(--yellow);
         }
@@ -309,6 +344,7 @@
             color:var(--primary);
         }
 
+        /* Blocked IP List Styling */
         .ip-list{
             list-style:none;
             max-height:180px;
@@ -321,7 +357,7 @@
             border-radius:12px;
             background:rgba(239,68,68,0.08);
             color:var(--red);
-            font-family:monospace;
+            font-family:monospace; /* Monospace for IP addresses */
         }
 
         .details-list{
@@ -340,6 +376,7 @@
             margin-top:10px;
         }
 
+        /* Container for Chart.js canvases */
         .chart-container{
             position:relative;
             height:230px;
@@ -353,6 +390,7 @@
             color:var(--primary);
         }
 
+        /* Custom Scrollbar Styling */
         ::-webkit-scrollbar{
             width:7px;
         }
@@ -362,6 +400,9 @@
             border-radius:20px;
         }
 
+        /* =========================================
+           RESPONSIVE MEDIA QUERIES (Mobile Devices)
+           ========================================= */
         @media(max-width:768px){
 
             body{
@@ -369,7 +410,7 @@
             }
 
             h1{
-                font-size:1.7rem;
+                font-size:1.7rem; /* Scale down title */
             }
 
             .header-container{
@@ -378,7 +419,7 @@
             }
 
             .members-grid{
-                grid-template-columns:1fr;
+                grid-template-columns:1fr; /* Stack team members on mobile */
             }
 
         }
@@ -388,10 +429,12 @@
 
 <body>
 
+<!-- Header Section: Contains Logo, Title, Live Status, and Theme Toggle -->
 <div class="header-container">
 
     <div class="header-left">
 
+        <!-- Fetch logo image dynamically using Flask's url_for -->
         <img src="{{ url_for('static', filename='logo.png') }}"
              alt="Logo"
              onerror="this.style.display='none'">
@@ -400,6 +443,7 @@
 
             <h1>Cyber Defensive Engine</h1>
 
+            <!-- Global system status badge (updated via dashboard.js) -->
             <div class="status-badge" id="main-status-badge">
                 <span class="pulse-dot" id="main-status-dot"></span>
                 <span id="main-status-text">System Live</span>
@@ -409,14 +453,17 @@
 
     </div>
 
+    <!-- Interactive switch to toggle Light/Dark CSS themes -->
     <div class="theme-toggle" id="themeToggle">
         <div class="toggle-ball"></div>
     </div>
 
 </div>
 
+<!-- Main Dashboard Content Grid -->
 <div class="dashboard-grid">
 
+    <!-- Card 1: Academic Project Information (Spans full width) -->
     <div class="card" style="grid-column:1/-1;">
 
         <h3>Project Details</h3>
@@ -449,12 +496,14 @@
 
     </div>
 
+    <!-- Card 2: Subsystem Status Indicators (ML, Cryptography, Honeypots) -->
     <div class="card">
 
         <h3>Active Subsystems</h3>
 
         <div style="margin-bottom:15px;">
             <strong>Machine Learning Module:</strong><br>
+            <!-- ML Status updated dynamically by dashboard.js during Baseline generation -->
             <span class="tag ml" id="ml-status">
                 Isolation Forest: Loading...
             </span>
@@ -476,15 +525,18 @@
 
         <div>
             <strong>Monitored System Logs:</strong><br>
+            <!-- Target logs populated via API fetch in dashboard.js -->
             <div id="log-monitors" style="margin-top:10px;"></div>
         </div>
 
     </div>
 
+    <!-- Card 3: Real-time Firewall Mitigation List -->
     <div class="card">
 
         <h3>Active Firewalled IPs</h3>
 
+        <!-- This list receives newly banned IPs from iptables telemetry -->
         <ul class="ip-list" id="blocked-ip-list">
 
             <li style="color:var(--muted); background:none;">
@@ -495,6 +547,7 @@
 
     </div>
 
+    <!-- Card 4: Quantitative Monitoring Metrics -->
     <div class="card">
 
         <h3>Monitoring Status</h3>
@@ -539,6 +592,7 @@
 
     </div>
 
+    <!-- Card 5: Qualitative Risk Assessment & Progress Bars -->
     <div class="card">
 
         <h3>Risk Assessment</h3>
@@ -564,6 +618,7 @@
             </span>
         </p>
 
+        <!-- Anomaly detection progress bar visually tied to ML output -->
         <div style="margin-top:20px;">
 
             <div style="display:flex; justify-content:space-between;">
@@ -586,12 +641,14 @@
 
     </div>
 
+    <!-- Card 6: Live Activity Log (Notifications feed) -->
     <div class="card">
 
         <h3>Live Activity Log</h3>
 
         <div class="log-container" id="log-container">
 
+            <!-- Events appended dynamically by dashboard.js addLogEntry() -->
             <ul class="log-list" id="event-log">
 
                 <li class="log-info">
@@ -605,21 +662,25 @@
 
     </div>
 
+    <!-- Card 7: Resource Utilization Timeline (Line Chart) -->
     <div class="card">
 
         <h3>Network Behavior Profiling</h3>
 
         <div class="chart-container">
+            <!-- Chart.js hooks into this canvas -->
             <canvas id="trafficChart"></canvas>
         </div>
 
     </div>
 
+    <!-- Card 8: Overall System Safety Gauge (Doughnut Chart) -->
     <div class="card">
 
         <h3>Threat Level Gauge</h3>
 
         <div class="chart-container">
+            <!-- Chart.js hooks into this canvas -->
             <canvas id="gaugeChart"></canvas>
         </div>
 
@@ -631,14 +692,17 @@
 
 </div>
 
+<!-- Theme Management Script -->
 <script>
 
     const toggle = document.getElementById("themeToggle");
 
+    // Check LocalStorage to persist user's theme preference across reloads
     if(localStorage.getItem("theme") === "light"){
         document.body.classList.add("light-theme");
     }
 
+    // Event Listener to handle toggling the light/dark mode CSS classes
     toggle.addEventListener("click", () => {
 
         document.body.classList.toggle("light-theme");
@@ -654,6 +718,7 @@
 
 </script>
 
+<!-- Link to external frontend logic handling AJAX and Chart manipulation -->
 <script src="{{ url_for('static', filename='dashboard.js') }}"></script>
 
 </body>
