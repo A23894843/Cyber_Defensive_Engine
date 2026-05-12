@@ -29,11 +29,24 @@
         
         /* Displays errors flashed from the Flask backend (Invalid credentials) */
         .error-message { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.4); color: var(--red); padding: 12px; border-radius: 12px; text-align: center; margin-bottom: 20px; font-weight: 600; font-size: 0.9rem; }
+        
+        /* Theme Toggle Styles */
+        .top-bar{ display:flex; justify-content:flex-end; align-items:center; margin-bottom:20px; }
+        .theme-toggle{ width:72px; height:38px; border-radius:40px; background:rgba(255,255,255,0.08); border:1px solid var(--border); display:flex; align-items:center; padding:4px; position:relative; cursor:pointer; }
+        .theme-toggle::before{ content:"☀️"; position:absolute; left:8px; font-size:13px; }
+        .theme-toggle::after{ content:"🌙"; position:absolute; right:8px; font-size:13px; }
+        .toggle-ball{ width:28px; height:28px; border-radius:50%; background:linear-gradient(135deg, var(--primary), var(--purple)); transition:0.3s ease; z-index:2; }
+        body.light-theme .toggle-ball{ transform:translateX(34px); }
     </style>
 </head>
 <body>
 
 <div class="login-container">
+    <!-- Theme Toggle Switch positioned at the top right of the login card -->
+    <div class="top-bar">
+        <div class="theme-toggle" id="themeToggle" title="Toggle Light/Dark Theme"><div class="toggle-ball"></div></div>
+    </div>
+
     <h1>Administrator Access</h1>
     <p class="subtitle">Enter your credentials to access the<br>Adaptive Cyber Defensive Engine</p>
 
@@ -58,6 +71,26 @@
         <button type="submit">AUTHENTICATE & ENTER</button>
     </form>
 </div>
+
+<!-- Theme Persistence and Toggle Logic -->
+<script>
+    const toggle = document.getElementById("themeToggle");
+
+    // Check LocalStorage to persist user's theme preference across page loads
+    if(localStorage.getItem("theme") === "light"){
+        document.body.classList.add("light-theme");
+    }
+
+    // Toggle the theme and save preference when clicked
+    toggle.addEventListener("click", () => {
+        document.body.classList.toggle("light-theme");
+        if(document.body.classList.contains("light-theme")){
+            localStorage.setItem("theme","light");
+        } else {
+            localStorage.setItem("theme","dark");
+        }
+    });
+</script>
 
 </body>
 </html>
