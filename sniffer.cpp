@@ -117,7 +117,7 @@
          writeLog("INFO: PQC Keys generated and public key saved.");
      }
  
-     // 2. Save private key for the Python Flask app (THIS WAS MISSING - Fixed for OTP Signing)
+     // 2. Save private key for the Python Flask app
      FILE *f_priv = fopen("/home/abhinandan-kali/Desktop/Cyber_Defensive_Engine/sniffer_private_key.bin", "wb");
      if (f_priv) {
          fwrite(secret_key, 1, sig_ctx->length_secret_key, f_priv);
@@ -186,10 +186,6 @@
          int new_client = accept(server_fd, NULL, NULL);
          if (new_client >= 0) {
              client_fd = new_client;
-             
-             // REMOVE OR COMMENT OUT THIS LINE:
-             // fcntl(client_fd, F_SETFL, O_NONBLOCK); 
-             
              writeLog("INFO: ML Module handshake complete via UDS.");
          } else return;
      }
