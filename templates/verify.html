@@ -7,6 +7,9 @@
 
     <style>
 
+        /* =========================================
+           CSS VARIABLES (Shared architecture)
+           ========================================= */
         :root{
 
             --bg:#0f172a;
@@ -21,7 +24,7 @@
             --primary:#38bdf8;
             --gold:#fbbf24;
             --purple:#8b5cf6;
-            --green:#22c55e;
+            --green:#22c55e; /* Added green for success/verification states */
 
             --shadow:0 10px 35px rgba(0,0,0,0.45);
         }
@@ -51,6 +54,7 @@
             box-sizing:border-box;
         }
 
+        /* Centered Flexbox Layout */
         body{
 
             background:
@@ -82,6 +86,7 @@
 
         }
 
+        /* Container specific to the OTP verification view (slightly narrower than setup) */
         .verify-container{
 
             width:100%;
@@ -103,7 +108,7 @@
 
             overflow:hidden;
 
-            text-align:center;
+            text-align:center; /* Centered text is optimal for OTP screens */
 
             animation:fadeIn 0.7s ease;
         }
@@ -257,6 +262,7 @@
             transform:translateX(34px);
         }
 
+        /* Large circular lock icon indicator */
         .status-icon{
 
             width:90px;
@@ -307,6 +313,9 @@
             margin-bottom:32px;
         }
 
+        /* =========================================
+           SPECIALIZED OTP INPUT FIELD
+           ========================================= */
         .otp-input{
 
             width:100%;
@@ -321,6 +330,7 @@
 
             color:var(--gold);
 
+            /* Enlarged font and letter spacing for clear OTP visibility */
             font-size:2rem;
 
             text-align:center;
@@ -423,6 +433,7 @@
             line-height:1.5;
         }
 
+        /* "Go Back / Resend" Link */
         .resend-link{
 
             display:inline-block;
@@ -454,7 +465,7 @@
 
             .otp-input{
                 font-size:1.5rem;
-                letter-spacing:6px;
+                letter-spacing:6px; /* Reduced letter spacing on mobile */
             }
 
             .security-info{
@@ -483,6 +494,7 @@
 
     </div>
 
+    <!-- Visual Confirmation Graphic -->
     <div class="status-icon">
         🔒
     </div>
@@ -493,8 +505,10 @@
         A secure 6-digit verification code has been sent to your registered administrator email address.
     </p>
 
+    <!-- OTP Submission Form: Triggers POST to Flask backend (/verify) to validate the cryptographic token -->
     <form action="/verify" method="POST">
 
+        <!-- Input restricted to 6 characters, prevents autocomplete from interfering -->
         <input
             type="text"
             name="otp"
@@ -525,12 +539,14 @@
 
     </div>
 
+    <!-- Graceful fallback if the user made an error entering their email -->
     <a href="/setup" class="resend-link">
         Change email or restart setup
     </a>
 
 </div>
 
+<!-- Standard theme controller script -->
 <script>
 
     const toggle = document.getElementById("themeToggle");
