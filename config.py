@@ -2,6 +2,10 @@ import os
 import threading
 from collections import defaultdict
 
+# ==========================================
+# SYSTEM LOG MONITORING CONFIGURATION
+# ==========================================
+# Defines the critical Linux system logs to monitor for signature-based threats
 LOG_FILES = [
     "/var/log/auth.log",    # Monitors sudo, pam_unix, and ssh-agent
     "/var/log/syslog",      # Monitors systemd, polkitd, and lightdm events
@@ -9,6 +13,10 @@ LOG_FILES = [
     "/var/log/dpkg.log",    # Monitors apt update/install activities seen in logs
 ]
 
+# ==========================================
+# THREAT SIGNATURE DATABASE
+# ==========================================
+# A set of known malicious strings and behaviors used by the file monitoring thread
 SUSPICIOUS_PATTERNS = {
     # --- Authentication & Access ---
     "password check failed",       # Confirmed in log: "password check failed for user"
@@ -32,6 +40,7 @@ SUSPICIOUS_PATTERNS = {
     "promiscuous mode",            # Standard sniffer detection
     
     # --- Web & Application Attacks ---
+    # Common payload signatures for SQL injection, XSS, and Directory Traversal
     "union select",
     "1=1",
     "<script>",
@@ -39,33 +48,49 @@ SUSPICIOUS_PATTERNS = {
     "/etc/passwd"
 }
 
-BASE_DIR = os.getcwd()
-otp_s = {}
-THRESHOLD = 3
-ALERT_COOLDOWN = 10
-TRAIN_DURATION = 600
-BLOCK_COOLDOWN = 300
-last_alert_time = {}
+# ==========================================
+# GLOBAL STATE & CONSTANTS
+# ==========================================
+BASE_DIR = os.getcwd() # Dynamically binds to the current working directory
+otp_s = {}             # In-memory store for OTP generation and validation
+THRESHOLD = 3          # Number of suspicious log entries before triggering an alert
+ALERT_COOLDOWN = 10    # Minutes to wait before re-alerting on the same IP
+TRAIN_DURATION = 600   # 10 minutes (600s) duration for ML baseline training
+BLOCK_COOLDOWN = 300   # 5 minutes (300s) duration before automatically unblocking an IP
+
+# Real-time tracking dictionaries
+last_alert_time = {}   # Tracks when an IP last triggered an email alert
 risk_score = defaultdict(int)
 failed_attempts = defaultdict(int)
-baseline_trainig = []
-attack_count = 0
-alert_history = []
+baseline_trainig = []  # Accumulates packet data for ML retraining
+attack_count = 0       # Global counter for dashboard statistics
+alert_history = []     # History of alerts generated
+
+# ==========================================
+# FILE PATH DEFINITIONS
+# ==========================================
+# Absolute paths for IPC, Logs, Models, and Keys
 log_path = os.path.join(BASE_DIR +  "/Cyber_Defensive_Engine.log")
-MODEL_FILE = os.path.join(BASE_DIR +  "/model.pkl")
-PIPE = os.path.join(BASE_DIR + "/packet_pipe")
-UDS_PATH = os.path.join(BASE_DIR + "/Cyber_Defensive_Engine.sock")
-PQC_PUB_KEY_PATH = os.path.join(BASE_DIR + "/pqc_public_key.bin")
-LOCK_PATH = os.path.join(BASE_DIR + "/main_engine.pid")
-model = None
-blocked_ips = set()
+MODEL_FILE = os.path.join(BASE_DIR +  "/model.pkl") # Serialized scikit-learn model
+PIPE = os.path.join(BASE_DIR + "/packet_pipe")      # Named Pipe (FIFO) for deterministic alerts
+UDS_PATH = os.path.join(BASE_DIR + "/Cyber_Defensive_Engine.sock") # Unix Domain Socket for ML data
+PQC_PUB_KEY_PATH = os.path.join(BASE_DIR + "/pqc_public_key.bin")  # Exported Dilithium Public Key
+LOCK_PATH = os.path.join(BASE_DIR + "/main_engine.pid") # Prevents multiple engine instances
 LOGO = os.path.join(BASE_DIR + "/logo.png")
-blocked_time = {}
+
+# Runtime variables
+model = None           # Holds the active IsolationForest instance
+blocked_ips = set()    # In-memory firewall tracking
+blocked_time = {}      # Timestamps for auto-unblock logic
 engine_status = "STABLE"
 
-sender_email = "cyberdefensiveengine@gmail.com"
-sender_password = "your_gmail_app_password"
+# ==========================================
+# NOTIFICATION & ALERTING CREDENTIALS
+# ==========================================
+sender_email = "your_gmail_id"
+sender_password = "your_gmail_app_paddword" # App-specific password for SMTP authentication
 name = None
 receiver_email = None
 
+# Threading event to synchronize detection loop with ML model readiness
 model_ready = threading.Event()
